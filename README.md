@@ -1,1 +1,4 @@
-here are a list of things to do first
+Here are a list of things to do first:
+
+Number One:
+
