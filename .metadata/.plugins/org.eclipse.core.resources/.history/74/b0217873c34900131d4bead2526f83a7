@@ -1,0 +1,35 @@
+package com.mydomain;
+
+import lejos.nxt.Button;
+import lejos.nxt.LCD;
+import lejos.nxt.SensorPort;
+
+public class UltrasonicSensor 
+{
+
+	public UltrasonicSensor(SensorPort port) throws InterruptedException {
+		// TODO Auto-generated constructor stub
+		port.setMode(SensorPort.SP_MODE_OUTPUT);
+		port.setSensorPin(6, 0);
+		
+		//Thread.sleep(1);
+		LCD.drawString("Ultrasonic Test", 0, 0);
+		LCD.drawString("PIN state: "+port.getSensorPin(6), 0, 1);
+		while(true)
+		{
+			if(Button.ESCAPE.isDown())
+				break;
+		}
+		
+		Button.waitForAnyPress();
+		
+		
+	}
+
+	public static void main(String[] args) throws InterruptedException 
+	{
+		// TODO Auto-generated method stub
+		new UltrasonicSensor(SensorPort.S2);
+	}
+
+}
