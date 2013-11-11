@@ -16,21 +16,20 @@ public class LightSensorTest
 	public LightSensorTest() 
 	{
 		LCD.drawString("LED Test Mode: " + leftSensor.getNormalizedLightValue(), 0, 0);
-		Button.waitForAnyPress();
+		
 		leftSensor.setFloodlight(true);
 		middleSensor.setFloodlight(true);
 		rightSensor.setFloodlight(true);
 		Button.waitForAnyPress();
-		
-		while(true)
+		long timer = System.currentTimeMillis();
+		while(!Button.ESCAPE.isDown())
 		{
-			LCD.drawString("Left LED:   " + leftSensor.getNormalizedLightValue() + "           ", 0, 1);
-			LCD.drawString("Middle LED: " + middleSensor.getNormalizedLightValue() + "      ", 0, 2);
-			LCD.drawString("Right LED:  " + rightSensor.getNormalizedLightValue() + "      ", 0, 3);
-			
-			if(Button.ESCAPE.isDown())
+			if((System.currentTimeMillis()-timer)> 250)
 			{
-				break;
+				LCD.drawString("Left LED:   " + leftSensor.getNormalizedLightValue() + "           ", 0, 1);
+				LCD.drawString("Middle LED: " + middleSensor.getNormalizedLightValue() + "      ", 0, 2);
+				LCD.drawString("Right LED:  " + rightSensor.getNormalizedLightValue() + "      ", 0, 3);
+				timer = System.currentTimeMillis();
 			}
 		}
 		

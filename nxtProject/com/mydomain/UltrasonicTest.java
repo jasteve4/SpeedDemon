@@ -13,7 +13,7 @@ public class UltrasonicTest //implements SensorPortListener
 	boolean lastEchoState = false;
 	long echoTimer = 0;
 	long timer = 0;
-	long detlaTime = 0;
+	double detlaTime = 0;
 	long displayCount = 0;
 	
 	
@@ -26,6 +26,7 @@ public class UltrasonicTest //implements SensorPortListener
 		
 		Thread.sleep(1);
 		LCD.drawString("Ultrasonic Test", 0, 0);
+		LCD.drawString("EchoTimer:", 0, 1);
 		long startTime = System.currentTimeMillis();
 		while(!Button.ESCAPE.isDown())
 		{
@@ -70,7 +71,7 @@ public class UltrasonicTest //implements SensorPortListener
 			if((!echoState)&&(lastEchoState))
 			{
 				lastEchoState = false;
-				detlaTime = (System.nanoTime() - echoTimer)/1000;
+				detlaTime = (double)(System.nanoTime() - echoTimer)/1000;
 				
 			}
 			if((echoState)&&(lastEchoState))
@@ -79,9 +80,9 @@ public class UltrasonicTest //implements SensorPortListener
 				
 			}
 			
-			if(displayCount > 100)
+			if(displayCount > 10)
 			{
-				LCD.drawString("EchoTimer: " + detlaTime, 0, 1);
+				LCD.drawString(""+detlaTime, 0, 2);
 				displayCount = 0;
 			}
 		}
