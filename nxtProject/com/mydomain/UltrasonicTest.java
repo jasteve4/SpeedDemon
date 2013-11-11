@@ -13,9 +13,8 @@ public class UltrasonicTest //implements SensorPortListener
 	boolean lastEchoState = false;
 	long echoTimer = 0;
 	long timer = 0;
-	long time = 0;
 	long detlaTime = 0;
-	long count = 0;
+	long displayCount = 0;
 	
 	
 	public UltrasonicTest(SensorPort port) throws InterruptedException {
@@ -40,7 +39,7 @@ public class UltrasonicTest //implements SensorPortListener
 				portStateHigh = true;
 				portStateLow = true;
 				startTime = System.currentTimeMillis();
-				count++;
+				displayCount++;
 			}
 			else if(((System.currentTimeMillis()-startTime)>=1)&&portStateLow)
 			{
@@ -80,10 +79,10 @@ public class UltrasonicTest //implements SensorPortListener
 				
 			}
 			
-			if(count > 100)
+			if(displayCount > 100)
 			{
 				LCD.drawString("EchoTimer: " + detlaTime, 0, 1);
-				count = 0;
+				displayCount = 0;
 			}
 		}
 		
