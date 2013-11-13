@@ -7,11 +7,20 @@ import lejos.nxt.LCD;
 import lejos.nxt.SensorPort;
 import lejos.nxt.SensorPortListener;
 
-public class UltrasonicSensor implements Runnable 
+public class UltrasonicSensor
 {
 
-	short threadCount = -1;
-	SensorPort port = null;
+	private SensorPort port = null;
+	private boolean portStateHigh = true;
+	private boolean portStateLow = true;
+	public long startTime = 0; //System.currentTimeMillis();
+	public short echoValue = 0;
+	public short echoValue1 = 0;
+	public boolean echoState = false;
+	public boolean lastEchoState = false;
+	private long echoTimer = 0;
+	public double detlaTime = 0;
+	
 	
 	public UltrasonicSensor(SensorPort Port) 
 	{
@@ -19,55 +28,70 @@ public class UltrasonicSensor implements Runnable
 		port = Port;
 		port.setSensorPinMode(SensorPort.SP_DIGI0, SensorPort.SP_MODE_INPUT);
 		port.setSensorPinMode(SensorPort.SP_DIGI1, SensorPort.SP_MODE_OUTPUT);
-		new Thread(this).start();
-	//	new Thread(this).start();
 		LCD.drawString("Ultrasionic Sensor On", 0, 0);
 		while(!Button.ENTER.isDown());
 	}
+	
+	
 
-	@Override
-	public void run() 
+	public void pig() 
 	{
 		// TODO Auto-generated method stub
-		threadCount++;
+		if(((System.currentTimeMillis()-startTime)<1)&&(portStateHigh))
+		{
+			port.setSensorPin(SensorPort.SP_DIGI1, 1);
+			portStateHigh = false;
+		}
+		else if(((System.currentTimeMillis()-startTime)>=49))
+		{
+			portStateHigh = true;
+			portStateLow = true;
+			startTime = System.currentTimeMillis();
+		}
+		else if(((System.currentTimeMillis()-startTime)>=1)&&portStateLow)
+		{
+			port.setSensorPin(SensorPort.SP_DIGI1, 0);
+			portStateLow = false;
+		}
+	}
+	
+	
+	public boolean echo()
+	{
+		if(port.getSensorPin(SensorPort.SP_DIGI0)==0)
+		{
+			echoState = false;
+			
+		}
+		else
+		{
+			echoState = true;
+		}
 		
-		if(threadCount == 0)
+		if((!echoState)&&(!lastEchoState))
 		{
-			boolean portStateHigh = true;
-			boolean portStateLow = true;
-			short displayCount = 0;
-			long startTime = System.currentTimeMillis();
-			while(!Button.ESCAPE.isDown())
-			{
-				if(((System.currentTimeMillis()-startTime)<1)&&(portStateHigh))
-				{
-					port.setSensorPin(SensorPort.SP_DIGI1, 1);
-					portStateHigh = false;
-				}
-				else if(((System.currentTimeMillis()-startTime)>=49))
-				{
-					portStateHigh = true;
-					portStateLow = true;
-					startTime = System.currentTimeMillis();
-					displayCount++;
-				}
-				else if(((System.currentTimeMillis()-startTime)>=1)&&portStateLow)
-				{
-					port.setSensorPin(SensorPort.SP_DIGI1, 0);
-					portStateLow = false;
-				}
-				
-			}
+			lastEchoState = false;
+			
+			
 		}
-		else if(threadCount==1)
+		if((echoState)&&(!lastEchoState))
 		{
-
-			while(!Button.ESCAPE.isDown())
-			{
-				
-			}
+			lastEchoState = true;
+			echoTimer = System.nanoTime();
 		}
-
+		if((!echoState)&&(lastEchoState))
+		{
+			lastEchoState = false;
+			detlaTime = (double)(System.nanoTime() - echoTimer)/1000;
+			return true;
+			
+		}
+		if((echoState)&&(lastEchoState))
+		{
+			lastEchoState = true;
+			
+		}
+		return false;
 	}
 
 	public static void main(String[] args) 
