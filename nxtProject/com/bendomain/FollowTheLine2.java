@@ -19,7 +19,7 @@ public class FollowTheLine2 {
 		IRSensorArray IRArray = new IRSensorArray(SensorPort.S1,SensorPort.S2,SensorPort.S3);
 		IRArray.IROn();
 		MotorControl motors = new MotorControl(MotorPort.A,MotorPort.B);
-		int MAX = 846;  // black
+		int MAX = 866;  // black
 		short timestep = 50;
 		int []readings = new int[3];
 		PID leftPID = new PID(1,0,0);
@@ -45,7 +45,8 @@ public class FollowTheLine2 {
 				leftPostion = leftPID.pid(MAX, readings[0], timestep);
 				rightPostion = rightPID.pid(MAX, readings[2], timestep);
 				centerPostion = centerPID.pid(MAX, readings[1], timestep);
-				//motors.updateMotors((int)(leftSpeed+ 20*leftPostion/446), (int)(rightSpeed + 20*rightPostion/446));
+				motors.leftMotor.setPower((int) (50+(leftPostion-866)/16));
+				motors.rightMotor.setPower((int) (50+(rightPostion-866)/16));
 				logString = logString + readings[0] + " " + leftPostion + " " + readings[2] + " " +  rightPostion + "\n"; 
 				currentTime = System.currentTimeMillis();
 			}
