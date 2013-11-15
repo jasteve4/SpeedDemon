@@ -4,8 +4,8 @@
 <fullyQualifiedTypeName name="lejos.nxt.Motor"/>
 <fullyQualifiedTypeName name="lejos.nxt.NXTMotor"/>
 <fullyQualifiedTypeName name="lejos.nxt.SensorPort"/>
-<fullyQualifiedTypeName name="lejos.nxt.Button"/>
 <fullyQualifiedTypeName name="java.lang.Thread"/>
 <fullyQualifiedTypeName name="lejos.nxt.LCD"/>
 <fullyQualifiedTypeName name="java.lang.System"/>
+<fullyQualifiedTypeName name="lejos.nxt.Button"/>
 </qualifiedTypeNameHistroy>
