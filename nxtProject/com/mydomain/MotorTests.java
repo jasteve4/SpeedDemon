@@ -1,55 +1,65 @@
 package com.mydomain;
 
 import lejos.nxt.Button;
-import lejos.nxt.LCD;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
 
 public class MotorTests 
 {
 	
-	NXTMotor leftMotor = new NXTMotor(MotorPort.A); 
-	long currentTime;
+	NXTMotor leftmotor = new NXTMotor(MotorPort.A); 
+	NXTMotor rightmotor = new NXTMotor(MotorPort.B); 	
+ 	
+	public long motorTimer;
+	public int time;
+	public log logger = new log();
+	public short detlaTime = 1;
 	
 	public MotorTests() throws InterruptedException 
 	{
 		// TODO Auto-generated constructor stub
-		currentTime = 0;
-		LCD.drawString("Motor Test", 0, 0);
-		Button.waitForAnyPress();
-		LCD.drawString("Start Test", 0, 1);
-		start(100);
-		long irt = 0;
-		while(true)
+		int i = 0;
+		long start = System.currentTimeMillis();
+		long ext = start;
+		String output = new String();
+		leftmotor.setPower(40);
+		rightmotor.setPower(40);
+		long motorTimer = start;
+		long timer = start;
+		int leftCurrent = 0;
+		int rightCurrent = 0;
+		int j = 0;
+		while(i<40)
 		{
-			if(Button.ESCAPE.isDown())
-			{
-				break;
-			}
-			long newTime = System.currentTimeMillis();
-			long detlaTime = newTime - currentTime;
-			LCD.drawString("Time: " + detlaTime , 0, 2);
-			currentTime = newTime;
-			Thread.sleep(5);
-			irt++;
-			
+				if((System.currentTimeMillis()-motorTimer)>=100)
+				{
+					output = output + (timer - start) + ", " + (timer - motorTimer) + ", " + (leftmotor.getTachoCount() - leftCurrent) +", "+ (rightmotor.getTachoCount() - rightCurrent) + "\n";
+					leftCurrent = leftmotor.getTachoCount();
+					rightCurrent = rightmotor.getTachoCount();
+					ext = System.currentTimeMillis();
+					motorTimer = ext;
+					i++;
+					
+				}
+				timer = System.currentTimeMillis();
 			
 		}
-		
-		LCD.drawString("Times: " + irt , 0, 3);
-		while(!Button.ENTER.isDown());
-		
-	}
-	
-	public void start(int power)
-	{
-		currentTime = System.currentTimeMillis();
-		leftMotor.setPower(power);
-		leftMotor.forward();
-		
-	}
+		logger.writeToLog(output);
+		time = (int) (motorTimer - ext);
+		System.out.println(((leftmotor.getTachoCount()-leftCurrent) +": "+ j));
+		logger.closeLog();
+		leftmotor.stop();
+		rightmotor.stop();
+		Button.waitForAnyPress();
 			
+	}
 	
+	
+	
+	public double linerFit(int pulesWidth)
+	{
+		return (double)(2.6824*pulesWidth) + 4.4731;
+	}
 	
 	public static void main(String[] args) throws InterruptedException 
 	{

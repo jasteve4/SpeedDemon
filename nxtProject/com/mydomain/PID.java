@@ -28,7 +28,7 @@ public class PID {
 	totalError = 0;
 	}
 	
-	public PID(int KP, int KD, int KI) 
+	public PID(double KP, double KD, double KI) 
 	{
 		// TODO Auto-generated constructor stub
 	kp = KP;

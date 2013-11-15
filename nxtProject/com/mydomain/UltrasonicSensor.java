@@ -5,7 +5,6 @@ package com.mydomain;
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.SensorPort;
-import lejos.nxt.SensorPortListener;
 
 public class UltrasonicSensor
 {
@@ -22,8 +21,12 @@ public class UltrasonicSensor
 	public double detlaTime = 0;
 	
 	
+	
+	
+	
+	
 	public UltrasonicSensor(SensorPort Port) 
-	{
+	{	
 		// TODO Auto-generated constructor stub
 		port = Port;
 		port.setSensorPinMode(SensorPort.SP_DIGI0, SensorPort.SP_MODE_INPUT);

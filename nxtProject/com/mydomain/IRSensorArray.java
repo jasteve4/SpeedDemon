@@ -5,15 +5,13 @@ import lejos.nxt.SensorPort;
 
 public class IRSensorArray 
 {
-
+	// dark reading is 866, white reading is 380 
 	private LightSensor leftIR = null;
 	private LightSensor middleIR = null;
 	private LightSensor rightIR = null;
-	private double kp = 10;
-	private double kd = 1;
-	private double ki = .1;
-	private short MAX = 1000;
-	private short MIN = 200;
+	private int MIN = 400;  // white
+	private int MAX = 846;  // black
+	private short state = 0;  // happy state is zero, 1 left sad, -1 is right sad
 	
 	public IRSensorArray(SensorPort left,SensorPort middle, SensorPort right) 
 	{
@@ -30,177 +28,72 @@ public class IRSensorArray
 		rightIR.setFloodlight(true);	
 	}
 	
-	private short poleLeft()
+	private int poleLeft()
 	{
-		return (short)leftIR.getNormalizedLightValue();
+		return leftIR.getNormalizedLightValue();
 	}
 	
-	private short poleRight()
+	private int poleRight()
 	{
-		return (short)rightIR.getNormalizedLightValue();
+		return rightIR.getNormalizedLightValue();
 	}	
 	
-	private short polemiddle()
+	private int polemiddle()
 	{
-		return (short)middleIR.getNormalizedLightValue();
+		return middleIR.getNormalizedLightValue();
 	}
 	
-	public double iRError()
+	public int [] calculateState()
 	{
-		double state = calculateState();
-		
-		
-		return 0.0;
-	}
-	
-	private short calculateState()
-	{
-		short leftReading = poleLeft();
-		short rightReading = poleRight();
-		short middleReading = 0;
-		if((leftReading >= MAX)||(rightReading >= MAX)) // is either sensor seeing all white
+		int leftReading = poleLeft();
+		int rightReading = poleRight();
+		int middleReading = 0;
+		int [] reading = {MAX, MAX, MAX};
+		if((leftReading >= MIN)||(rightReading >= MIN)) // is either sensor seeing all white
 			middleReading = polemiddle();
-		if(middleReading == 0) 		// if the line is in the middle of the robot
+		// MAX = Dark  MIN = white
+		if(middleReading == 0)
 		{
-			if(leftReading > MIN)  // left sensor is reading
+			if(leftReading >= MAX) // left Sensor reading white
 			{
-				if(leftReading >= 3*MAX/4)
-				{
-					return -6;
-				}
-				else if((leftReading < 3*MAX/4)&&(leftReading >= 2*MAX/4))
-				{
-					return -5;
-					
-				}
-				else if((leftReading < 2*MAX/4)&&(leftReading >= MAX/4))
-				{
-					return -4;
-				}			
-				else
-				{
-					return -3;
-				}
+				reading[0] = leftReading;
+				state = 1;
+				return reading;
 			}
-			if(rightReading >= MIN)
+			if(rightReading >= MAX) // right Sensor reading white
 			{
-				if(rightReading >= 3*MAX/4)
-				{
-					return 6;
-				}
-				else if((rightReading < 3*MAX/4)&&(rightReading >= 2*MAX/4))
-				{
-					return 5;
-					
-				}
-				else if((rightReading < 2*MAX/4)&&(rightReading >= MAX/4))
-				{
-					return 4;
-				}			
-				else
-				{
-					return 3;
-				}
+				reading[2] = rightReading;
+				state = -1;
+				return reading;
 			}
-			return 0;
+			state = 0;
+			return reading;
 		}
-		else						// line is to the right or left of the robot
+		else
 		{
-			if(leftReading >= MAX)  // line is on the right robot
+			if((leftReading >= MAX)&&(rightReading >= MAX)) // left Sensor reading white
 			{
-					if(middleReading >= 3*MAX/4)
-					{
-						
-					}
-					else if((middleReading < 3*MAX/4)&&(middleReading >= 2*MAX/4))
-					{
-						
-						
-					}
-					else if((middleReading < 2*MAX/4)&&(middleReading >= MAX/4))
-					{
-						
-						
-					}			
-					else
-					{
-						
-						
-					}
-					
-					
-					if(rightReading >= 3*MAX/4)
-					{
-						
-					}
-					else if((rightReading < 3*MAX/4)&&(rightReading >= 2*MAX/4))
-					{
-						
-						
-					}
-					else if((rightReading < 2*MAX/4)&&(rightReading >= MAX/4))
-					{
-						
-						
-					}			
-					else
-					{
-						
-						
-						
-					}
-			}
-			else					// line is on the left robot
-			{
-				if(leftReading >= 3*MAX/4)
-				{
-					
-				}
-				else if((leftReading < 3*MAX/4)&&(leftReading >= 2*MAX/4))
-				{
-					
-					
-				}
-				else if((leftReading < 2*MAX/4)&&(leftReading >= MAX/4))
-				{
-					
-					
-				}			
-				else
-				{
-					
-					
-				}
-				
-				
-				if(middleReading >= 3*MAX/4)
-				{
-					
-				}
-				else if((middleReading < 3*MAX/4)&&(middleReading >= 2*MAX/4))
-				{
-					
-					
-				}
-				else if((middleReading < 2*MAX/4)&&(middleReading >= MAX/4))
-				{
-					
-					
-				}			
-				else
-				{
-					
-					
-					
-				}
-				
-				
-				
+				reading[0] = leftReading;
+				reading[1] = middleReading;
+				reading[2] = rightReading;
+				return reading;
 			}
 			
-			
+			else if(leftReading >= MAX) // left Sensor reading white
+			{
+				reading[0] = leftReading;
+				reading[1] = middleReading;
+				state = 1;
+				return reading;
+			}
+			else
+			{
+				state = -1;
+				reading[2] = rightReading;
+				reading[1] = middleReading;
+				return reading;
+			}
 		}
-		return 0;
 	}
 	
 	public static void main(String[] args) 
