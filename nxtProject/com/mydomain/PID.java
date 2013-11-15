@@ -57,9 +57,9 @@ public class PID {
 	
 	public static void main(String args[])
 	{
-		PID test = new PID();
+		PID test = new PID(1,0,0);
 		for(int n = 0; n < 10; n++)
-			System.out.println(test.pid(50, 51,1));
+			System.out.println(test.pid(846, 866, 100));
 		
 	}
 

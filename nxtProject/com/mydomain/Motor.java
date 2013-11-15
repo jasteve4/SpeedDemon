@@ -5,7 +5,6 @@ import lejos.nxt.NXTMotor;
 
 public class Motor 
 {
-
 	private NXTMotor motor;
 	private PID motorPID = null;
 	private long motorTimer = 0;
@@ -39,6 +38,11 @@ public class Motor
 			motor.setPower(power);
 			count = motor.getTachoCount();
 		}
+	}
+	
+	public void setPower(int setPoint)
+	{
+		motor.setPower(setPoint);
 	}
 	
 	public double linerFit(int pulesWidth)
