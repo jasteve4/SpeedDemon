@@ -20,11 +20,7 @@ public class UltrasonicSensor
 	private long echoTimer = 0;
 	public double detlaTime = 0;
 	
-	
-	
-	
-	
-	
+
 	public UltrasonicSensor(SensorPort Port) 
 	{	
 		// TODO Auto-generated constructor stub
@@ -36,7 +32,6 @@ public class UltrasonicSensor
 	}
 	
 	
-
 	public void pig() 
 	{
 		// TODO Auto-generated method stub
@@ -97,6 +92,7 @@ public class UltrasonicSensor
 		return false;
 	}
 
+	
 	public static void main(String[] args) 
 	{
 		// TODO Auto-generated method stub
