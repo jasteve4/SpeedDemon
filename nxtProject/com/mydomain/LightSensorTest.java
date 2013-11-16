@@ -11,6 +11,8 @@ public class LightSensorTest
 	LightSensor leftSensor = new LightSensor(SensorPort.S1,false);
 	LightSensor middleSensor = new LightSensor(SensorPort.S2,false);
 	LightSensor rightSensor = new LightSensor(SensorPort.S3,false);
+	log logger = new log();
+	String value = new String();
 	
 	
 	public LightSensorTest() 
@@ -29,9 +31,12 @@ public class LightSensorTest
 				LCD.drawString("Left LED:   " + leftSensor.getNormalizedLightValue() + "           ", 0, 1);
 				LCD.drawString("Middle LED: " + middleSensor.getNormalizedLightValue() + "      ", 0, 2);
 				LCD.drawString("Right LED:  " + rightSensor.getNormalizedLightValue() + "      ", 0, 3);
+				value = value + leftSensor.getNormalizedLightValue() + ", " + middleSensor.getNormalizedLightValue() + ", " + rightSensor.getNormalizedLightValue() + "\n";
 				timer = System.currentTimeMillis();
 			}
 		}
+		logger.writeToLog(value);
+		logger.closeLog();
 		
 		
 		// TODO Auto-generated constructor stub

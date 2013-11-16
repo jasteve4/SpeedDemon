@@ -40,7 +40,6 @@ public class FollowTheLine {
 				leftPostion = leftPID.pid(MAX, readings[0], timestep);
 				rightPostion = rightPID.pid(MAX, readings[2], timestep);
 				centerPostion = centerPID.pid(MAX, readings[1], timestep);
-				motors.updateMotors((int)(leftSpeed+ 20*leftPostion/446), (int)(rightSpeed + 20*rightPostion/446));
 				logString = logString + readings[0] + ", " + leftPostion + ", " + readings[2] + ", " +  rightPostion + "\n"; 
 				currentTime = System.currentTimeMillis();
 			}

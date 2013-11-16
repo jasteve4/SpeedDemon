@@ -1,18 +1,18 @@
 package com.mydomain;
 
+import java.util.ArrayList;
+
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
 
 public class Motor 
 {
-
+	public ArrayList<Integer> powerLogger = new ArrayList<Integer>();
 	private NXTMotor motor;
-	private PID motorPID = null;
+	//private PID motorPID = null;
 	private long motorTimer = 0;
 	private short detlaTime = 40;
-	private long count = 0;
 	public long pulseCount = 0;
-	private int speed = 0;
 	private int power = 0;
 	public double mult = 1;
 	
@@ -25,26 +25,19 @@ public class Motor
 	
 	public void PIDSetup(double kP, double kI, double kD)
 	{	
-		motorPID = new PID(kP,kI,kD);
+		//motorPID = new PID(kP,kI,kD);
 	}
 	
 	public void setSpeed(int setPoint)
 	{
 		if((System.currentTimeMillis() - motorTimer) >= detlaTime)
 		{
-			pulseCount = (motor.getTachoCount()-count);
+			motor.setPower((int) (mult*power));
 			motorTimer = System.currentTimeMillis();
-			speed = (int) motorPID.pid(setPoint, pulseCount, detlaTime);
-			power = (int)linerFit(speed);
-			motor.setPower(power);
-			count = motor.getTachoCount();
+			powerLogger.add(setPoint);
 		}
 	}
 	
-	public double linerFit(int pulesWidth)
-	{
-		return (double)(mult*2.6824*pulesWidth) + 4.4731;
-	}
 	
 	public static void main(String[] args) 
 	{

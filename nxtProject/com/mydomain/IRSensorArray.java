@@ -1,5 +1,6 @@
 package com.mydomain;
 
+import lejos.nxt.Button;
 import lejos.nxt.LightSensor;
 import lejos.nxt.SensorPort;
 
@@ -12,6 +13,7 @@ public class IRSensorArray
 	private int MIN = 400;  // white
 	private int MAX = 846;  // black
 	private short state = 0;  // happy state is zero, 1 left sad, -1 is right sad
+	
 	
 	public IRSensorArray(SensorPort left,SensorPort middle, SensorPort right) 
 	{
@@ -38,7 +40,7 @@ public class IRSensorArray
 		return rightIR.getNormalizedLightValue();
 	}	
 	
-	private int polemiddle()
+	private int poleMiddle()
 	{
 		return middleIR.getNormalizedLightValue();
 	}
@@ -47,60 +49,34 @@ public class IRSensorArray
 	{
 		int leftReading = poleLeft();
 		int rightReading = poleRight();
-		int middleReading = 0;
-		int [] reading = {MAX, MAX, MAX};
-		if((leftReading >= MIN)||(rightReading >= MIN)) // is either sensor seeing all white
-			middleReading = polemiddle();
-		// MAX = Dark  MIN = white
-		if(middleReading == 0)
-		{
-			if(leftReading >= MAX) // left Sensor reading white
-			{
-				reading[0] = leftReading;
-				state = 1;
-				return reading;
-			}
-			if(rightReading >= MAX) // right Sensor reading white
-			{
-				reading[2] = rightReading;
-				state = -1;
-				return reading;
-			}
-			state = 0;
-			return reading;
-		}
-		else
-		{
-			if((leftReading >= MAX)&&(rightReading >= MAX)) // left Sensor reading white
-			{
-				reading[0] = leftReading;
-				reading[1] = middleReading;
-				reading[2] = rightReading;
-				return reading;
-			}
-			
-			else if(leftReading >= MAX) // left Sensor reading white
-			{
-				reading[0] = leftReading;
-				reading[1] = middleReading;
-				state = 1;
-				return reading;
-			}
-			else
-			{
-				state = -1;
-				reading[2] = rightReading;
-				reading[1] = middleReading;
-				return reading;
-			}
-		}
+		int middleReading = poleMiddle();
+		int []readings = {leftReading, rightReading, middleReading};
+		return readings;
 	}
 	
 	public static void main(String[] args) 
 	{
 		// TODO Auto-generated method stub
-		new IRSensorArray(SensorPort.S1,SensorPort.S2,SensorPort.S3);
-
+		log logger = new log();
+		String value = new String();
+		IRSensorArray  IR = new IRSensorArray(SensorPort.S1,SensorPort.S2,SensorPort.S3);
+		int [] readings = new int[3];
+		readings[0] = 0;
+		readings[1] = 0;
+		readings[2] = 0;
+		long timer = System.currentTimeMillis();
+		while(!Button.ESCAPE.isDown())
+		{
+			
+			if((System.currentTimeMillis() - timer) > 50)
+			{
+				readings = IR.calculateState();
+				value = value + readings[0] + ", " + readings[1] + ", " + readings[2] + "\n";
+				timer = System.currentTimeMillis();
+			}
+		}
+		logger.writeToLog(value);
+		logger.closeLog();
 	}
 
 }
