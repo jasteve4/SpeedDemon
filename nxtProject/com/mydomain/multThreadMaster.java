@@ -32,7 +32,6 @@ public class multThreadMaster implements Runnable
 		echo.ping = trigger;
 		
 		trigger.wakeUp();
-		System.out.println("here");
 
 		
 		
