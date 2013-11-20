@@ -18,6 +18,7 @@ public class MultMotorControl implements Runnable
 	private PID echoPID;
 	private int [] readings = {0, 0, 0};
 	private long echoReading = 0;
+	private Display display = null; 
 	
 	public MultMotorControl() 
 	{
@@ -26,14 +27,14 @@ public class MultMotorControl implements Runnable
 		echo = new Echo(SensorPort.S4);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI0, SensorPort.SP_MODE_INPUT);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI1, SensorPort.SP_MODE_OUTPUT);
-		leftMotor = new multThreadMotor(MotorPort.A);
-		rightMotor = new multThreadMotor(MotorPort.B);
+		//leftMotor = new multThreadMotor(MotorPort.A);
+		//rightMotor = new multThreadMotor(MotorPort.B);
 		irArray = new MultIRArray(SensorPort.S1,SensorPort.S2,SensorPort.S3);
 		leftMotorPID = new PID(1, 0, 0);
 		centerAdjustPID = new PID(1,0,0);
 		rightMotorPID = new PID(1, 0, 0);
 		echoPID = new PID(1, 0, 0);
-		Display display = new Display();
+		display = new Display();
 		
 		display.motorControl = this;
 		trigger.echo = echo;
@@ -42,6 +43,12 @@ public class MultMotorControl implements Runnable
 		
 		
 	}
+	
+	public static void main()
+	{
+		new MultMotorControl();
+	}
+	
 	
 	public synchronized void wakeUp() 
 	{
@@ -78,6 +85,8 @@ public class MultMotorControl implements Runnable
 		//leftMotor.wakeUp();
 		//rightMotor.wakeUp();
 		irArray.wakeUp();
+		display.wakeUp();
+		
 		while((!wakeUp)&&(!Button.ESCAPE.isDown()));
 		while(!Button.ESCAPE.isDown())
 		{

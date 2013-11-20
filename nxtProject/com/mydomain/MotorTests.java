@@ -17,36 +17,41 @@ public class MotorTests
 	
 	public MotorTests() throws InterruptedException 
 	{
-		// TODO Auto-generated constructor stub
-		int i = 0;
+		String output = new String();
 		long start = System.currentTimeMillis();
 		long ext = start;
-		String output = new String();
-		leftmotor.setPower(40);
-		rightmotor.setPower(40);
-		long motorTimer = start;
-		long timer = start;
-		int leftCurrent = 0;
-		int rightCurrent = 0;
-		int j = 0;
-		while(i<40)
+		Button.waitForAnyPress();
+		for(int pow = 0; pow <= 100; pow += 10)
 		{
-				if((System.currentTimeMillis()-motorTimer)>=100)
-				{
-					output = output + (timer - start) + ", " + (timer - motorTimer) + ", " + (leftmotor.getTachoCount() - leftCurrent) +", "+ (rightmotor.getTachoCount() - rightCurrent) + "\n";
-					leftCurrent = leftmotor.getTachoCount();
-					rightCurrent = rightmotor.getTachoCount();
-					ext = System.currentTimeMillis();
-					motorTimer = ext;
-					i++;
-					
-				}
-				timer = System.currentTimeMillis();
-			
+			int i = 0;
+			start = System.currentTimeMillis();
+			ext = start;
+			leftmotor.setPower(pow);
+			rightmotor.setPower(pow);
+			long motorTimer = start;
+			long timer = start;
+			int leftCurrent = 0;
+			int rightCurrent = 0;
+			int j = 0;
+			while(i<10&&!Button.ESCAPE.isDown())
+			{
+					if((System.currentTimeMillis()-motorTimer)>=100)
+					{
+						output = output + (timer - start) + ", " + (timer - motorTimer) + ", " + (leftmotor.getTachoCount() - leftCurrent) +", "+ (rightmotor.getTachoCount() - rightCurrent) + "\n";
+						leftCurrent = leftmotor.getTachoCount();
+						rightCurrent = rightmotor.getTachoCount();
+						ext = System.currentTimeMillis();
+						motorTimer = ext;
+						i++;
+						
+					}
+					timer = System.currentTimeMillis();
+				
+			}
 		}
 		logger.writeToLog(output);
 		time = (int) (motorTimer - ext);
-		System.out.println(((leftmotor.getTachoCount()-leftCurrent) +": "+ j));
+//		System.out.println(((leftmotor.getTachoCount()-leftCurrent) +": "+ j));
 		logger.closeLog();
 		leftmotor.stop();
 		rightmotor.stop();

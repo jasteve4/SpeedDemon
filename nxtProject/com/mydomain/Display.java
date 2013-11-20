@@ -16,6 +16,11 @@ public class Display implements Runnable
 		LCD.drawString("Display", 0, 0);
 		new Thread(this).start();
 	}
+	
+	public synchronized void wakeUp() 
+	{
+			wakeUp = true;
+	}
 
 	@Override
 	public void run() 
