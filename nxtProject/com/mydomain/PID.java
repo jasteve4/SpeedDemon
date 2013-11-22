@@ -52,7 +52,8 @@ public class PID {
 		iError = ki*integralError;
 		totalError = pError+dError+iError;
 		previousError=currentError;
-		return totalError + target;
+		return totalError;
+		//return totalError + target;
 	}
 	
 	public static void main(String args[])

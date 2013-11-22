@@ -30,12 +30,15 @@ public class Motor
 	
 	public void setSpeed(int setPoint)
 	{
+		motor.setPower(setPoint);
+		/*
 		if((System.currentTimeMillis() - motorTimer) >= detlaTime)
 		{
 			motor.setPower((int) (mult*power));
 			motorTimer = System.currentTimeMillis();
 			powerLogger.add(setPoint);
 		}
+		*/
 	}
 	
 	

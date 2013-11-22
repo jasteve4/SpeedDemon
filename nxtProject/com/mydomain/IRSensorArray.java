@@ -10,7 +10,7 @@ public class IRSensorArray
 	private LightSensor leftIR = null;
 	private LightSensor middleIR = null;
 	private LightSensor rightIR = null;
-	private int MIN = 400;  // white
+	private int MIN = 386;  // white
 	private int MAX = 846;  // black
 	private short state = 0;  // happy state is zero, 1 left sad, -1 is right sad
 	
@@ -44,12 +44,43 @@ public class IRSensorArray
 	{
 		return middleIR.getNormalizedLightValue();
 	}
+	public int getState()
+	{
+		return state;
+	}
 	
 	public int [] calculateState()
 	{
 		int leftReading = poleLeft();
 		int rightReading = poleRight();
 		int middleReading = poleMiddle();
+		//int []readings = {leftReading, rightReading, middleReading};
+		if(leftReading<MAX-10&&rightReading>MAX-10)
+		{
+			if(middleReading<MAX-10)
+			{
+				state = 2;
+			}
+			else
+			{
+				state = 1;
+			}
+		}
+		else if(leftReading>MAX-10&&rightReading<MAX-10)
+		{
+			if(middleReading<MAX-10)
+			{
+				state = -2;
+			}
+			else
+			{
+				state = -1;
+			}
+		}
+		else if(leftReading>MAX-10&&rightReading>MAX-10)
+		{
+			state = 0;
+		}
 		int []readings = {leftReading, rightReading, middleReading};
 		return readings;
 	}
