@@ -37,13 +37,14 @@ public class Ping implements Runnable
 				port.setSensorPin(SensorPort.SP_DIGI1, 1);
 				Thread.sleep(1);
 				port.setSensorPin(SensorPort.SP_DIGI1, 0);
-				Thread.sleep(49);
+				Thread.sleep(waitTime);
 				echo.wakeUp();
 				while((!wakeUp)&&(!Button.ESCAPE.isDown()));
 				wakeUp = false;
 			}
 			catch (Exception e)
 			{
+				System.out.println("all no");
 				e.printStackTrace();
 				return;
 			}

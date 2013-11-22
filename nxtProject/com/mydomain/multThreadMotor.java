@@ -14,6 +14,7 @@ public class multThreadMotor implements Runnable
 	{
 		// TODO Auto-generated constructor stub
 		motor = new NXTMotor(port);
+		System.out.println("here");
 		new Thread(this).start();
 		
 	}
@@ -33,7 +34,7 @@ public class multThreadMotor implements Runnable
 	public void run() 
 	{
 		// TODO Auto-generated method stub
-		while(!wakeUp);
+		while((!wakeUp)&&(!Button.ESCAPE.isDown()));
 		while(!Button.ESCAPE.isDown())
 		{
 			try
