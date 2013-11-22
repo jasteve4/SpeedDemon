@@ -52,10 +52,10 @@ public class DisplayReadings implements Runnable
 				LCD.drawString("" + readings[0] , 0, 4);
 				LCD.drawString("" + readings[1] , 0, 5);
 				LCD.drawString("" + readings[2] , 0, 6);
-				string = string + echoReading + ", " + readings[0] + 
-						", " + ", " + readings[1] +  ", " + readings[2] + 
-						", " + error[0] +  ", " + error[1] +  ", " + error[2] +  
-						", " + error[3] + "\n"; 
+			//	string = string + echoReading + ", " + readings[0] + 
+			//			", " + ", " + readings[1] +  ", " + readings[2] + 
+			//			", " + error[0] +  ", " + error[1] +  ", " + error[2] +  
+			//			", " + error[3] + "\n"; 
 				Thread.sleep(100);
 			}
 			

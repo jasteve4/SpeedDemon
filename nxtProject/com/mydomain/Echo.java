@@ -35,20 +35,39 @@ public class Echo implements Runnable
 	public void run() 
 	{
 		// TODO Auto-generated method stub
+		long timeoutTime = 0;
+		
 		while((!wakeUp)&&(!Button.ESCAPE.isDown()));
 			
 		while(!Button.ESCAPE.isDown())
 		{
-			wakeUp = false;
-			
-			while((port.getSensorPin(SensorPort.SP_DIGI0) == 0)&&(!Button.ESCAPE.isDown()));
-			riseTime = System.nanoTime();
-			
-			while((port.getSensorPin(SensorPort.SP_DIGI0) > 0)&&(!Button.ESCAPE.isDown()));
-			pulseTime = System.nanoTime() - riseTime;
-			ping.wakeUp();
-			
-			while((!wakeUp)&&(!Button.ESCAPE.isDown()));
+			try
+			{
+				wakeUp = false;
+				timeoutTime = System.nanoTime();
+				while((port.getSensorPin(SensorPort.SP_DIGI0) == 0)&&(!Button.ESCAPE.isDown()))
+				{
+					if((System.nanoTime()-timeoutTime)>12000)
+					{
+						ping.wakeUp();
+						timeoutTime = System.nanoTime();
+					}
+						
+				}
+				riseTime = System.nanoTime();
+				
+				while((port.getSensorPin(SensorPort.SP_DIGI0) > 0)&&(!Button.ESCAPE.isDown())&&((System.nanoTime()-riseTime)>5000));
+				pulseTime = System.nanoTime() - riseTime;
+				Thread.sleep(40);
+				
+				ping.wakeUp();
+				
+				while((!wakeUp)&&(!Button.ESCAPE.isDown()));
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
 			
 		}
 	}
