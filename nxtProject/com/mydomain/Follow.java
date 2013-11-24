@@ -19,6 +19,7 @@ public class Follow implements Runnable
 	public PID leftPID;
 	public PID rightPID;
 	public PID centerPID;
+	public PID positionPID;
 	public int leftSpeed = 60;
 	public int rightSpeed = 60;
 	public int timeStep = 10;
@@ -32,6 +33,7 @@ public class Follow implements Runnable
 	public int leftTunedSpeed;
 	public int rightTunedSpeed;
 	public double position = 0;
+	public double error = 0;
 	
 	
 	public Follow() 
@@ -43,7 +45,8 @@ public class Follow implements Runnable
 		echoPid = new PID(1,0,0);
 		leftPID = new PID(0.9,.01,0);
 		rightPID = new PID(0.9,.01,0);
-		centerPID = new PID(2,0,0);		
+		centerPID = new PID(2,0,0);	
+		positionPID = new PID(.6,0,0);
 		motors = new MotorControl(MotorPort.A,MotorPort.B);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI0, SensorPort.SP_MODE_INPUT);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI1, SensorPort.SP_MODE_OUTPUT);
@@ -79,9 +82,11 @@ public class Follow implements Runnable
 					echoValue = ping.getPulseLenght()/1000;
 					echoError = echoPid.pid(1000, echoValue, timeStep);
 					position = array.calculatePosition();
-					readings = array.calculateState();
+					error = positionPID.pid(0,position,timeStep);
 					
-					leftPosition = 20*leftPID.pid(MAX, readings[0], timeStep)/IR_MAX_ERROR;
+				//	readings = array.calculateState();
+					
+					/*leftPosition = 20*leftPID.pid(MAX, readings[0], timeStep)/IR_MAX_ERROR;
 					rightPosition = 20*rightPID.pid(MAX, readings[2], timeStep)/IR_MAX_ERROR;
 					centerPosition = 20*centerPID.pid(MAX, readings[1], timeStep)/IR_MAX_ERROR;
 					
@@ -99,9 +104,9 @@ public class Follow implements Runnable
 					{
 						leftTunedSpeed = (int) (leftSpeed+leftPosition-rightPosition/5);
 						rightTunedSpeed = (int) (rightSpeed+rightPosition-leftPosition/5);
-					}
+					}*/
 					
-					motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
+					motors.updateMotors((int)(60 + error),(int)(60 - error));
 				}
 		}
 		catch (InterruptedException e) 
