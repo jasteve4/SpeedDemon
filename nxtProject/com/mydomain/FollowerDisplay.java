@@ -16,6 +16,24 @@ public class FollowerDisplay implements Runnable
 	public long startTime;
 	public int [] power = {0, 0};
 	
+	public List<String> data = new List<String>();
+	
+	public saveData(){
+		echoReading = follower.getUltraSonicReading();
+		readings = follower.getIRReading();
+		error = follower.getPosition();
+		power = follower.getPower();
+		double dtime = follower.getDTime();
+	
+		string = string + ((double)(System.nanoTime() - startTime)/1000000) + ", " + echoReading + ", " + readings[0]
+				+ ", " + readings[1] +  ", " + readings[2] + 
+				", " + power[0] + ", " + power[1] + ", " + error[0] +  ", " + error[1] +  ", " + error[2] +  
+			", " + error[3] + ", " + dtime + "\n";
+		
+		synchronized(data){
+			data.add(string);
+		}
+	}
 
 	public FollowerDisplay() 
 	{
@@ -52,26 +70,35 @@ public class FollowerDisplay implements Runnable
 			startTime = System.nanoTime();
 			while(!Button.ESCAPE.isDown())
 			{
-				echoReading = follower.getUltraSonicReading();
+				/*echoReading = follower.getUltraSonicReading();
 				readings = follower.getIRReading();
 				error = follower.getPosition();
 				power = follower.getPower();
 				double dtime = follower.getDTime();
-			/*	LCD.drawString("" + echoReading , 0, 2);
+				LCD.drawString("" + echoReading , 0, 2);
 				LCD.drawString("" + readings[0] , 0, 4);
 				LCD.drawString("" + readings[1] , 0, 5);
-				LCD.drawString("" + readings[2] , 0, 6);*/
+				LCD.drawString("" + readings[2] , 0, 6);
 				string = string + ((double)(System.nanoTime() - startTime)/1000000) + ", " + echoReading + ", " + readings[0]
 						+ ", " + readings[1] +  ", " + readings[2] + 
 						", " + power[0] + ", " + power[1] + ", " + error[0] +  ", " + error[1] +  ", " + error[2] +  
-					", " + error[3] + ", " + dtime + "\n";
-				if((System.currentTimeMillis() - writeTimer) >= 1000)
+					", " + error[3] + ", " + dtime + "\n"; 
+				*/
+					
+				if((System.currentTimeMillis() - writeTimer) >= 500)
 				{
-					logger.writeToLog(string);
+					List<String> temp = new LinkedList<String>();
+					synchronized(data){
+						temp = data;
+					}
+					for(String s: temp){
+						logger.writeToLog(string);
+					}
 					string = "";
 					writeTimer = System.currentTimeMillis();
 				}
-				Thread.sleep(10);
+				Thread.sleep(500);
+				
 			}
 			logger.closeLog();
 		}
