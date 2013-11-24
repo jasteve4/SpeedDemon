@@ -3,9 +3,9 @@ package com.mydomain;
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 
-public class FollowerDisplay implements Runnable 
+public class FollowDisplay implements Runnable 
 {
-	public Follower follower = null;
+	public Follow follow = null;
 	public boolean wakeUp = false;
 	public int [] readings = {0, 0, 0};
 	public double [] error = {0, 0, 0, 0};
@@ -15,12 +15,13 @@ public class FollowerDisplay implements Runnable
 	public log logger = null;
 	public long startTime;
 	public int [] power = {0, 0};
+	public double position = 0;
 	
 
-	public FollowerDisplay() 
+	public FollowDisplay() 
 	{
 		// TODO Auto-generated constructor stub
-		logger = new log("AfterPIDTest.txt");
+		logger = new log("Control.txt");
 		new Thread(this).start();
 	}
 
@@ -39,12 +40,12 @@ public class FollowerDisplay implements Runnable
 	public void run() 
 	{
 		// TODO Auto-generated method stub
-	/*	LCD.drawString("UltraSonic", 0, 1);
-		LCD.drawString("IR Readings ", 0, 3);*/
-		string = "time, echo Reading, left sensor, center sensor, right sensor, left power, right power, echo error, left error, center error, right error, dtime\n";
+		LCD.drawString("UltraSonic", 0, 1);
+		LCD.drawString("IR Readings ", 0, 3);
+		string = "time, echo Reading, left sensor, center sensor, right sensor, left power, right power, echo error, left position, center position, right position, postion\n";
 		while(logger == null);
 		logger.writeToLog(string);
-		LCD.drawString("logger enabling", 0, 7);
+		LCD.drawString("logger enabled n", 0, 7);
 		
 		try
 		{
@@ -52,11 +53,11 @@ public class FollowerDisplay implements Runnable
 			startTime = System.nanoTime();
 			while(!Button.ESCAPE.isDown())
 			{
-				echoReading = follower.getUltraSonicReading();
-				readings = follower.getIRReading();
-				error = follower.getPosition();
-				power = follower.getPower();
-				double dtime = follower.getDTime();
+				echoReading = follow.getUltraSonicReading();
+				readings = follow.getIRReading();
+				error = follow.getPosition();
+				power = follow.getPower();
+				position = follow.getPostion2();
 			/*	LCD.drawString("" + echoReading , 0, 2);
 				LCD.drawString("" + readings[0] , 0, 4);
 				LCD.drawString("" + readings[1] , 0, 5);
@@ -64,7 +65,7 @@ public class FollowerDisplay implements Runnable
 				string = string + ((double)(System.nanoTime() - startTime)/1000000) + ", " + echoReading + ", " + readings[0]
 						+ ", " + readings[1] +  ", " + readings[2] + 
 						", " + power[0] + ", " + power[1] + ", " + error[0] +  ", " + error[1] +  ", " + error[2] +  
-					", " + error[3] + ", " + dtime + "\n";
+					", " + error[3] + ", " + position +"\n";
 				if((System.currentTimeMillis() - writeTimer) >= 1000)
 				{
 					logger.writeToLog(string);
@@ -82,4 +83,3 @@ public class FollowerDisplay implements Runnable
 	}
 
 }
-

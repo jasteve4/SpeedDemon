@@ -10,7 +10,7 @@ public class Follower implements Runnable
 {
 
 	public PingLoop ping;
-	public FollowerDisplay display;
+	public FollowerDisplay followerDisplay;
 	public double echoValue = 0;
 	public IRSensorArray array = null;
 	public int [] readings = {0, 0, 0};
@@ -38,7 +38,7 @@ public class Follower implements Runnable
 	{
 		// TODO Auto-generated constructor stub		
 		ping = new PingLoop(49,SensorPort.S4);
-		display = new FollowerDisplay();
+		followerDisplay = new FollowerDisplay();
 		array = new IRSensorArray(SensorPort.S1,SensorPort.S2,SensorPort.S3);
 		echoPid = new PID(1,0,0);
 		leftPID = new PID(0.9,.01,0);
@@ -47,7 +47,7 @@ public class Follower implements Runnable
 		motors = new MotorControl(MotorPort.A,MotorPort.B);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI0, SensorPort.SP_MODE_INPUT);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI1, SensorPort.SP_MODE_OUTPUT);
-		display.follower = this;
+		followerDisplay.follower = this;
 
 		LCD.drawString("System Ready", 0, 0);
 		new Thread(this).start();
@@ -73,14 +73,13 @@ public class Follower implements Runnable
 			-2 is both off, left on
 			-3 is all off
 		*/
-		int state 0;
-		long current_time= System.System.nanoTime();
+		long current_time= System.nanoTime();
 		long prev_time = System.nanoTime();
 
 		while(!Button.ENTER.isDown());
 		LCD.drawString("System Active", 0, 0);
 		ping.wakeUp();		
-		display.wakeUp();
+		followerDisplay.wakeUp();
 		leftTunedSpeed = leftSpeed;
 		rightTunedSpeed = rightSpeed;
 		try {
@@ -95,7 +94,7 @@ public class Follower implements Runnable
 					
 					//normalize PID values (motors at 08, maximum add 20)
 					//IR_MAX_ERROR/2+MIN  yields gray target value
-					current_time= System.System.nanoTime();
+					current_time= System.nanoTime();
 					dtime =  current_time-prev_time / 1000;
 					leftError = 20*leftPID.pid(IR_MAX_ERROR/2+MIN, readings[0], dtime)/IR_MAX_ERROR;
 					rightError = 20*rightPID.pid(MAX, readings[2], dtime)/IR_MAX_ERROR;
@@ -103,7 +102,7 @@ public class Follower implements Runnable
 					prev_time = current_time;
 					
 					
-					if( leftError < RightError ){
+					if( leftError < rightError ){
 						leftTunedSpeed = (int) (leftTunedSpeed+leftError + centerError);
 						rightTunedSpeed = (int) (rightTunedSpeed+rightError);
 					}

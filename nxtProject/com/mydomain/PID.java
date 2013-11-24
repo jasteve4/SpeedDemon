@@ -43,7 +43,7 @@ public class PID {
 	totalError = 0;
 	}	
 	
-	public double pid(int target, double processVar, int timestep)
+	public double pid(int target, double processVar, double timestep)
 	{
 		currentError = (target - processVar);
 		pError = kp*currentError;

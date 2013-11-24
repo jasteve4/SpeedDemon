@@ -41,8 +41,8 @@ public class Control implements Runnable
 		display = new DisplayReadings();
 		array = new IRSensorArray(SensorPort.S1,SensorPort.S2,SensorPort.S3);
 		echoPid = new PID(1,0,0);
-		leftPID = new PID(.8,.2,0); // kc = .8
-		rightPID = new PID(.8,.2,0); // kc = .8
+		leftPID = new PID(.8,.3,0); // kc = .8
+		rightPID = new PID(.8,.3,0); // kc = .8
 		centerPID = new PID(1,0,0); // kc = 1
 		motors = new MotorControl(MotorPort.A,MotorPort.B);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI0, SensorPort.SP_MODE_INPUT);

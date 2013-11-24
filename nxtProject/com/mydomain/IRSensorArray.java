@@ -12,7 +12,9 @@ public class IRSensorArray
 	private LightSensor rightIR = null;
 	private int MIN = 386;  // white
 	private int MAX = 846;  // black
+	private int RANGE = MAX - MIN;
 	private short state = 0;  // happy state is zero, 1 left sad, -1 is right sad
+	private double setPoint =  0;
 	
 	
 	public IRSensorArray(SensorPort left,SensorPort middle, SensorPort right) 
@@ -85,15 +87,24 @@ public class IRSensorArray
 		return readings;
 	}
 	
-/*	public int [] calculateRange()
+	public double calculatePosition()
 	{
 		int leftReading = poleLeft();
 		int rightReading = poleRight();
 		int middleReading = poleMiddle();
+		double leftPostion = RANGE - (leftReading - MIN)/(RANGE);
+		double rightPostion = RANGE - (rightReading - MIN)/(RANGE);
+		double centerPostion = RANGE - (middleReading - MIN)/(RANGE);
+		short multDir = 1;
 		
-		double leftRange = 4 * leftReading/(MAX -MIN);
+		if(leftPostion > 0)
+			multDir = -1;
 		
-	}*/
+		double position = setPoint - leftPostion + rightPostion + multDir * centerPostion;
+		
+		return 0;
+		
+	}
 	
 	public static void main(String[] args) 
 	{
