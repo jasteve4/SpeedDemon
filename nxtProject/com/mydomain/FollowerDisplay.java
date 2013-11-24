@@ -3,9 +3,9 @@ package com.mydomain;
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 
-public class DisplayReadings implements Runnable 
+public class FollowerDisplay implements Runnable 
 {
-	public Control control = null;
+	public Follower follower = null;
 	public boolean wakeUp = false;
 	public int [] readings = {0, 0, 0};
 	public double [] error = {0, 0, 0, 0};
@@ -17,7 +17,7 @@ public class DisplayReadings implements Runnable
 	public int [] power = {0, 0};
 	
 
-	public DisplayReadings() 
+	public FollowerDisplay() 
 	{
 		// TODO Auto-generated constructor stub
 		logger = new log("ControlTest.txt");
@@ -52,10 +52,10 @@ public class DisplayReadings implements Runnable
 			startTime = System.nanoTime();
 			while(!Button.ESCAPE.isDown())
 			{
-				echoReading = control.getUltraSonicReading();
-				readings = control.getIRReading();
-				error = control.getPosition();
-				power = control.getPower();
+				echoReading = follower.getUltraSonicReading();
+				readings = follower.getIRReading();
+				error = follower.getPosition();
+				power = follower.getPower();
 			/*	LCD.drawString("" + echoReading , 0, 2);
 				LCD.drawString("" + readings[0] , 0, 4);
 				LCD.drawString("" + readings[1] , 0, 5);
@@ -81,3 +81,4 @@ public class DisplayReadings implements Runnable
 	}
 
 }
+

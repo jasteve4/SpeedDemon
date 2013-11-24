@@ -6,11 +6,11 @@ import lejos.nxt.MotorPort;
 import lejos.nxt.SensorPort;
 
 
-public class Control implements Runnable 
+public class Follower implements Runnable 
 {
 
 	public PingLoop ping;
-	public DisplayReadings display;
+	public FollowerDisplay display;
 	public double echoValue = 0;
 	public IRSensorArray array = null;
 	public int [] readings = {0, 0, 0};
@@ -34,20 +34,20 @@ public class Control implements Runnable
 	
 	
 	
-	public Control() 
+	public Follower() 
 	{
 		// TODO Auto-generated constructor stub		
 		ping = new PingLoop(49,SensorPort.S4);
-		display = new DisplayReadings();
+		display = new FollowerDisplay();
 		array = new IRSensorArray(SensorPort.S1,SensorPort.S2,SensorPort.S3);
 		echoPid = new PID(1,0,0);
-		leftPID = new PID(.8,.2,0); // kc = .8
-		rightPID = new PID(.8,.2,0); // kc = .8
-		centerPID = new PID(1,0,0); // kc = 1
+		leftPID = new PID(0.9,.01,0);
+		rightPID = new PID(0.9,.01,0);
+		centerPID = new PID(2,0,0);		
 		motors = new MotorControl(MotorPort.A,MotorPort.B);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI0, SensorPort.SP_MODE_INPUT);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI1, SensorPort.SP_MODE_OUTPUT);
-		display.control = this;
+		display.follower = this;
 
 		LCD.drawString("System Ready", 0, 0);
 		new Thread(this).start();
@@ -78,6 +78,7 @@ public class Control implements Runnable
 					Thread.sleep(timeStep);
 					echoValue = ping.getPulseLenght()/1000;
 					echoError = echoPid.pid(1000, echoValue, timeStep);
+					
 					readings = array.calculateState();
 					
 					leftPosition = 20*leftPID.pid(MAX, readings[0], timeStep)/IR_MAX_ERROR;

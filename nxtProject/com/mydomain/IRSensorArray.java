@@ -85,6 +85,16 @@ public class IRSensorArray
 		return readings;
 	}
 	
+/*	public int [] calculateRange()
+	{
+		int leftReading = poleLeft();
+		int rightReading = poleRight();
+		int middleReading = poleMiddle();
+		
+		double leftRange = 4 * leftReading/(MAX -MIN);
+		
+	}*/
+	
 	public static void main(String[] args) 
 	{
 		// TODO Auto-generated method stub
