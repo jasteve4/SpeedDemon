@@ -92,17 +92,15 @@ public class IRSensorArray
 		int leftReading = poleLeft();
 		int rightReading = poleRight();
 		int middleReading = poleMiddle();
-		double leftPostion = RANGE - (leftReading - MIN)/(RANGE);
-		double rightPostion = RANGE - (rightReading - MIN)/(RANGE);
-		double centerPostion = RANGE - (middleReading - MIN)/(RANGE);
+		double leftPostion =  (leftReading - MIN);
+		double rightPostion = (rightReading - MIN);
+		double centerPostion = (middleReading - MIN);
 		short multDir = 1;
 		
-		if(leftPostion > 0)
-			multDir = -1;
+		//if(leftPostion > 0)
+		//	multDir = -1;
 		
-		double position = setPoint - leftPostion + rightPostion + multDir * centerPostion;
-		
-		return 0;
+		return  setPoint + leftPostion + rightPostion + multDir * centerPostion;
 		
 	}
 	
