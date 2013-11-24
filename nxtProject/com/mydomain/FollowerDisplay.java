@@ -3,6 +3,9 @@ package com.mydomain;
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class FollowerDisplay implements Runnable 
 {
 	public Follower follower = null;
@@ -16,9 +19,9 @@ public class FollowerDisplay implements Runnable
 	public long startTime;
 	public int [] power = {0, 0};
 	
-	public List<String> data = new List<String>();
+	public List<String> data = new LinkedList<String>();
 	
-	public saveData(){
+	public void saveData(){
 		echoReading = follower.getUltraSonicReading();
 		readings = follower.getIRReading();
 		error = follower.getPosition();
