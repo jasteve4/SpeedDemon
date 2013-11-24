@@ -95,7 +95,7 @@ public class Follower implements Runnable
 					//normalize PID values (motors at 08, maximum add 20)
 					//IR_MAX_ERROR/2+MIN  yields gray target value
 					current_time= System.nanoTime();
-					dtime =  current_time-prev_time / 1000;
+					dtime =  (current_time-prev_time) / 1000;
 					leftError = 20*leftPID.pid(IR_MAX_ERROR/2+MIN, readings[0], dtime)/IR_MAX_ERROR;
 					rightError = 20*rightPID.pid(MAX, readings[2], dtime)/IR_MAX_ERROR;
 					centerError = 20*centerPID.pid(IR_MAX_ERROR/2+MIN, readings[1], dtime)/IR_MAX_ERROR;
@@ -103,14 +103,19 @@ public class Follower implements Runnable
 					
 					
 					if( leftError < rightError ){
-						leftTunedSpeed = (int) (leftTunedSpeed+leftError + centerError);
-						rightTunedSpeed = (int) (rightTunedSpeed+rightError);
+						leftTunedSpeed = (int) (leftSpeed+leftError + centerError);
+						rightTunedSpeed = (int) (rightSpeed+rightError);
 					}
 					else{
-						leftTunedSpeed = (int) (leftTunedSpeed+leftError );
-						rightTunedSpeed = (int) (rightTunedSpeed+rightError + centerError);
+						leftTunedSpeed = (int) (leftSpeed+leftError );
+						rightTunedSpeed = (int) (rightSpeed+rightError + centerError);
 					}
-					
+										//if all off line,
+					//stop and admit defeat
+					if((readings[0] < 400) && (readings[1] < 400) && (readings[2] < 400) ){
+						leftTunedSpeed = (int) 0;
+						rightTunedSpeed = (int) 0;
+					}
 					
 					
 					/*old code
