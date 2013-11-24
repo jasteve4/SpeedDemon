@@ -137,6 +137,9 @@ public class Follower implements Runnable
 					*/
 					
 					motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
+					
+					// log data
+					followerDisplay.saveData();
 				}
 		}
 		catch (InterruptedException e) 
