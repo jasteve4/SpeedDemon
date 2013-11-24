@@ -20,7 +20,7 @@ public class FollowerDisplay implements Runnable
 	public FollowerDisplay() 
 	{
 		// TODO Auto-generated constructor stub
-		logger = new log("ControlTest.txt");
+		logger = new log("AfterPIDTest.txt");
 		new Thread(this).start();
 	}
 
@@ -41,7 +41,7 @@ public class FollowerDisplay implements Runnable
 		// TODO Auto-generated method stub
 		LCD.drawString("UltraSonic", 0, 1);
 		LCD.drawString("IR Readings ", 0, 3);
-		string = "time, echo Reading, left sensor, center sensor, right sensor, left power, right power, echo error, left position, center position, right position\n";
+		string = "time, echo Reading, left sensor, center sensor, right sensor, left power, right power, echo error, left error, center error, right error, dtime\n";
 		while(logger == null);
 		logger.writeToLog(string);
 		LCD.drawString("logger enabled", 0, 7);
@@ -56,6 +56,7 @@ public class FollowerDisplay implements Runnable
 				readings = follower.getIRReading();
 				error = follower.getPosition();
 				power = follower.getPower();
+				double dtime = follower.getDTime();
 			/*	LCD.drawString("" + echoReading , 0, 2);
 				LCD.drawString("" + readings[0] , 0, 4);
 				LCD.drawString("" + readings[1] , 0, 5);
@@ -63,7 +64,7 @@ public class FollowerDisplay implements Runnable
 				string = string + ((double)(System.nanoTime() - startTime)/1000000) + ", " + echoReading + ", " + readings[0]
 						+ ", " + readings[1] +  ", " + readings[2] + 
 						", " + power[0] + ", " + power[1] + ", " + error[0] +  ", " + error[1] +  ", " + error[2] +  
-					", " + error[3] + "\n";
+					", " + error[3] + ", "  dtime "\n";
 				if((System.currentTimeMillis() - writeTimer) >= 1000)
 				{
 					logger.writeToLog(string);

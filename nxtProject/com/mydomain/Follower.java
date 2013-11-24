@@ -22,9 +22,9 @@ public class Follower implements Runnable
 	public int leftSpeed = 60;
 	public int rightSpeed = 60;
 	public int timeStep = 10;
-	public double leftPosition = 0.0;
-	public double rightPosition = 0.0;
-	public double centerPosition = 0.0;
+	public double leftError = 0.0;
+	public double rightError = 0.0;
+	public double centerError = 0.0;
 	public double echoError = 0;
 	public int MAX = 866;  // black
 	public int MIN	= 380;
@@ -32,7 +32,7 @@ public class Follower implements Runnable
 	public int leftTunedSpeed;
 	public int rightTunedSpeed;
 	
-	
+	public double dtime = 0.0;
 	
 	public Follower() 
 	{
@@ -64,6 +64,18 @@ public class Follower implements Runnable
 	public void run() 
 	{
 		// TODO Auto-generated method stub
+		
+		/* 0 is all on line
+			1 is left off, both on
+			2 is both off, right on
+			3 is all off
+			-1 is right off, both on
+			-2 is both off, left on
+			-3 is all off
+		*/
+		int state 0;
+		long current_time= System.System.nanoTime();
+		long prev_time = System.nanoTime();
 
 		while(!Button.ENTER.isDown());
 		LCD.drawString("System Active", 0, 0);
@@ -81,25 +93,36 @@ public class Follower implements Runnable
 					
 					readings = array.calculateState();
 					
-					leftPosition = 20*leftPID.pid(MAX, readings[0], timeStep)/IR_MAX_ERROR;
-					rightPosition = 20*rightPID.pid(MAX, readings[2], timeStep)/IR_MAX_ERROR;
-					centerPosition = 20*centerPID.pid(MAX, readings[1], timeStep)/IR_MAX_ERROR;
+					//normalize PID values (motors at 08, maximum add 20)
+					//IR_MAX_ERROR/2+MIN  yields gray target value
+					current_time= System.System.nanoTime();
+					dtime =  current_time-prev_time / 1000;
+					leftError = 20*leftPID.pid(IR_MAX_ERROR/2+MIN, readings[0], dtime)/IR_MAX_ERROR;
+					rightError = 20*rightPID.pid(MAX, readings[2], dtime)/IR_MAX_ERROR;
+					centerError = 20*centerPID.pid(IR_MAX_ERROR/2+MIN, readings[1], dtime)/IR_MAX_ERROR;
+					prev_time = current_time;
 					
+					
+					
+					
+					
+					/*old code
 					if(array.getState()==2)
 					{
-						leftTunedSpeed = (int) (leftSpeed+leftPosition);
-						rightTunedSpeed = (int) (rightSpeed-leftPosition);
+						leftTunedSpeed = (int) (leftTunedSpeed+leftPosition + center);
+						rightTunedSpeed = (int) (rightTunedSpeed-leftPosition);
 					}
 					else if(array.getState()==-2)
 					{
-						leftTunedSpeed = (int) (leftSpeed-rightPosition);
-						rightTunedSpeed = (int) (rightSpeed+rightPosition);
+						leftTunedSpeed = (int) (leftTunedSpeed-rightPosition);
+						rightTunedSpeed = (int) (rightTunedSpeed+rightPosition);
 					}
 					else
 					{
-						leftTunedSpeed = (int) (leftSpeed+leftPosition-rightPosition/5);
-						rightTunedSpeed = (int) (rightSpeed+rightPosition-leftPosition/5);
+						leftTunedSpeed = (int) (leftTunedSpeed+leftPosition-rightPosition/5);
+						rightTunedSpeed = (int) (rightTunedSpeed+rightPosition-leftPosition/5);
 					}
+					*/
 					
 					motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
 				}
@@ -123,7 +146,7 @@ public class Follower implements Runnable
 
 	public synchronized double [] getPosition()
 	{
-		double[] error = {echoError, leftPosition, centerPosition, rightPosition};
+		double[] error = {echoError, leftError, centerError, rightError};
 		return error;
 	}
 	
@@ -133,6 +156,12 @@ public class Follower implements Runnable
 		return power;
 	}
 	
+	public synchronized double getDTime()
+	{
+		
+		return dtime;
+		
+	}
 	
 
 }
