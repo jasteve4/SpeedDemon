@@ -11,7 +11,7 @@ public class LightSensorTest
 	LightSensor leftSensor = new LightSensor(SensorPort.S1,false);
 	LightSensor middleSensor = new LightSensor(SensorPort.S2,false);
 	LightSensor rightSensor = new LightSensor(SensorPort.S3,false);
-	log logger = new log();
+	log logger = new log("LightSensor.txt");
 	String value = new String();
 	
 	

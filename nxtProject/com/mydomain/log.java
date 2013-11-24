@@ -9,14 +9,14 @@ public class log
 	private OutputStream outStream = null;
 	private File OutputFile = null;
 	
-	public log() 
+	public log(String logFile) 
 	{
 		// TODO Auto-generated constructor stub
 		try
 		{
-		OutputFile = new File("log.txt");
-		outStream = new FileOutputStream(OutputFile);
-		osWriter = new OutputStreamWriter(outStream);
+			OutputFile = new File(logFile);
+			outStream = new FileOutputStream(OutputFile);
+			osWriter = new OutputStreamWriter(outStream);
 		}
 		catch(IOException e)
 		{
@@ -57,7 +57,7 @@ public class log
 	public static void main(String[] args) 
 	{
 		// TODO Auto-generated method stub
-		log test = new log();
+		log test = new log("logTest.txt");
 		test.writeToLog("Yes oh Yes");
 		test.closeLog();
 	

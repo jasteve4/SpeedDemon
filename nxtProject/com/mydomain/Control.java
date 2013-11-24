@@ -3,7 +3,6 @@ package com.mydomain;
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.MotorPort;
-import lejos.nxt.NXTMotor;
 import lejos.nxt.SensorPort;
 
 
@@ -35,7 +34,7 @@ public class Control implements Runnable
 	
 	
 	
-	public Control() throws InterruptedException 
+	public Control() 
 	{
 		// TODO Auto-generated constructor stub		
 		ping = new PingLoop(49,SensorPort.S4);
@@ -57,12 +56,7 @@ public class Control implements Runnable
 	public static void main(String[] args) 
 	{
 		// TODO Auto-generated method stub
-		try {
-			new Control();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		new Control();
 	
 	}
 

@@ -12,7 +12,7 @@ public class MotorTests
  	
 	public long motorTimer;
 	public int time;
-	public log logger = new log();
+	public log logger = new log("MotorTest.txt");
 	public short detlaTime = 1;
 	
 	public MotorTests() throws InterruptedException 

@@ -19,7 +19,7 @@ public class DisplayReadings implements Runnable
 	public DisplayReadings() 
 	{
 		// TODO Auto-generated constructor stub
-		logger = new log();
+		logger = new log("ControlTest.txt");
 		new Thread(this).start();
 	}
 

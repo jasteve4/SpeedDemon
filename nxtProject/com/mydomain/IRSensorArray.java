@@ -88,7 +88,7 @@ public class IRSensorArray
 	public static void main(String[] args) 
 	{
 		// TODO Auto-generated method stub
-		log logger = new log();
+		log logger = new log("IRSensor.txt");
 		String value = new String();
 		IRSensorArray  IR = new IRSensorArray(SensorPort.S1,SensorPort.S2,SensorPort.S3);
 		int [] readings = new int[3];

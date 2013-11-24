@@ -28,7 +28,7 @@ public class FollowTheLine {
 		double leftPostion = 0.0;
 		double rightPostion = 0.0;
 		double centerPostion = 0.0;
-		log logger = new log();
+		log logger = new log("FollowLine.txt");
 		String logString = new String();
 		int leftSpeed = 60;
 		int rightSpeed = 60;
