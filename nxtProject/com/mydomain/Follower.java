@@ -103,6 +103,14 @@ public class Follower implements Runnable
 					prev_time = current_time;
 					
 					
+					if( leftError < RightError ){
+						leftTunedSpeed = (int) (leftTunedSpeed+leftError + centerError);
+						rightTunedSpeed = (int) (rightTunedSpeed+rightError);
+					}
+					else{
+						leftTunedSpeed = (int) (leftTunedSpeed+leftError );
+						rightTunedSpeed = (int) (rightTunedSpeed+rightError + centerError);
+					}
 					
 					
 					
