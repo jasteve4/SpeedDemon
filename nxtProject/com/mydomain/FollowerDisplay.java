@@ -39,8 +39,8 @@ public class FollowerDisplay implements Runnable
 	public void run() 
 	{
 		// TODO Auto-generated method stub
-	/*	LCD.drawString("UltraSonic", 0, 1);
-		LCD.drawString("IR Readings ", 0, 3);*/
+		LCD.drawString("UltraSonic", 0, 1);
+		LCD.drawString("IR Readings ", 0, 3);
 		string = "time, echo Reading, left sensor, center sensor, right sensor, left power, right power, echo error, left error, center error, right error, dtime\n";
 		while(logger == null);
 		logger.writeToLog(string);
