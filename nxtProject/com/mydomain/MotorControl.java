@@ -23,6 +23,15 @@ public class MotorControl {
 	
 	public void updateMotors(int leftSpeed, int rightSpeed)
 	{
+		if(leftSpeed > 100)
+			leftSpeed = 100;
+		if(leftSpeed < 0)
+			leftSpeed = 0;
+		if(rightSpeed > 100)
+			rightSpeed = 100;
+		if(rightSpeed < 0)
+			rightSpeed = 0;		
+		
 		leftMotor.setSpeed(leftSpeed);
 		rightMotor.setSpeed(rightSpeed);
 	}
