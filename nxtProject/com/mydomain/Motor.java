@@ -33,6 +33,10 @@ public class Motor
 		motor.setPower(setPoint);
 	}
 	
+	public void stop()
+	{
+		motor.stop();
+	}
 	
 	public static void main(String[] args) 
 	{

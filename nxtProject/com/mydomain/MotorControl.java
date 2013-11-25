@@ -37,6 +37,12 @@ public class MotorControl {
 	}
 	
 	
+	public void stopMotors()
+	{
+		leftMotor.stop();
+		rightMotor.stop();
+	}
+	
 	public static void main(String[] args) 
 	{
 		// TODO Auto-generated method stub
