@@ -91,10 +91,12 @@ public class FollowerDisplay implements Runnable
 				if((System.currentTimeMillis() - writeTimer) >= 500)
 				{
 					List<String> temp = new LinkedList<String>();
-					synchronized(data){
+					synchronized(data)
+					{
 						temp = data;
 					}
-					for(String s: temp){
+					for(String s: temp)
+					{
 						logger.writeToLog(string);
 					}
 					string = "";

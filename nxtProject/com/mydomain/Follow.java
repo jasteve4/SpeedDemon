@@ -20,6 +20,7 @@ public class Follow implements Runnable
 	public PID rightPID;
 	public PID centerPID;
 	public PID positionPID;
+	public PID curvePID;
 	public int leftSpeed = 60;
 	public int rightSpeed = 60;
 	public int timeStep = 10;
@@ -34,6 +35,7 @@ public class Follow implements Runnable
 	public int rightTunedSpeed;
 	public double position = 0;
 	public double error = 0;
+	public double curveError = 0;
 	
 	
 	public Follow() 
@@ -45,8 +47,9 @@ public class Follow implements Runnable
 		echoPid = new PID(1,0,0);
 		leftPID = new PID(0.9,.01,0);
 		rightPID = new PID(0.9,.01,0);
-		centerPID = new PID(2,0,0);	
-		positionPID = new PID(.6,0,0);
+		centerPID = new PID(.9,0,0);	
+		positionPID = new PID(.9,3.1,.0001); 		// kc = .95
+		curvePID = new PID(2.1, 4,.001);
 		motors = new MotorControl(MotorPort.A,MotorPort.B);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI0, SensorPort.SP_MODE_INPUT);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI1, SensorPort.SP_MODE_OUTPUT);
@@ -80,33 +83,13 @@ public class Follow implements Runnable
 				{
 					Thread.sleep(timeStep);
 					echoValue = ping.getPulseLenght()/1000;
-					echoError = echoPid.pid(1000, echoValue, timeStep);
+					echoError = echoPid.pid(1000, echoValue, .01);
 					position = array.calculatePosition();
-					error = positionPID.pid(0,position,timeStep);
+					curveError = 20 * curvePID.pid(0,position,timeStep)/(3*IR_MAX_ERROR);
+					error = 20 * positionPID.pid(0,position,timeStep)/(3*IR_MAX_ERROR);
 					
-				//	readings = array.calculateState();
 					
-					/*leftPosition = 20*leftPID.pid(MAX, readings[0], timeStep)/IR_MAX_ERROR;
-					rightPosition = 20*rightPID.pid(MAX, readings[2], timeStep)/IR_MAX_ERROR;
-					centerPosition = 20*centerPID.pid(MAX, readings[1], timeStep)/IR_MAX_ERROR;
-					
-					if(array.getState()==2)
-					{
-						leftTunedSpeed = (int) (leftSpeed+leftPosition);
-						rightTunedSpeed = (int) (rightSpeed-leftPosition);
-					}
-					else if(array.getState()==-2)
-					{
-						leftTunedSpeed = (int) (leftSpeed-rightPosition);
-						rightTunedSpeed = (int) (rightSpeed+rightPosition);
-					}
-					else
-					{
-						leftTunedSpeed = (int) (leftSpeed+leftPosition-rightPosition/5);
-						rightTunedSpeed = (int) (rightSpeed+rightPosition-leftPosition/5);
-					}*/
-					
-					motors.updateMotors((int)(60 + error),(int)(60 - error));
+					motors.updateMotors((int)(60 - curveError),(int)(60 + curveError));
 				}
 		}
 		catch (InterruptedException e) 

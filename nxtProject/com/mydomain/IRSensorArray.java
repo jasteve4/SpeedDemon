@@ -96,7 +96,6 @@ public class IRSensorArray
 		double leftPostion =  RANGE - (leftReading - MIN);
 		double rightPostion = RANGE - (rightReading - MIN);
 		double centerPostion = RANGE - (middleReading - MIN);
-		short multDir = 1;
 		
 		if(leftReading<MAX-10&&rightReading>MAX-10)
 		{
@@ -111,7 +110,7 @@ public class IRSensorArray
 			statePosition = 0;
 		}
 		
-		return  setPoint + statePosition * (leftPostion + rightPostion + multDir * centerPostion);
+		return  setPoint + statePosition * (leftPostion + rightPostion + centerPostion);
 		
 	}
 	
