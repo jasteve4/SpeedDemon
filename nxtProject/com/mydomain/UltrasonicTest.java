@@ -93,6 +93,6 @@ public class UltrasonicTest //implements SensorPortListener
 	public static void main(String[] args) throws InterruptedException 
 	{
 		// TODO Auto-generated method stub
-		new UltrasonicTest(SensorPort.S1);
+		new UltrasonicTest(SensorPort.S4);
 	}
 }

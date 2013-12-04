@@ -16,6 +16,7 @@ public class IRSensorArray
 	private short state = 0;  // happy state is zero, 1 left sad, -1 is right sad
 	private double setPoint =  0;
 	private short statePosition = 0;
+	private int [] readings = {0, 0, 0};
 	
 	
 	public IRSensorArray(SensorPort left,SensorPort middle, SensorPort right) 
@@ -88,29 +89,36 @@ public class IRSensorArray
 		return readings;
 	}
 	
+	public int [] poleSensor()
+	{
+		return readings;
+	}
+	
+	// here is the function that you will need to deterime where your car is in relation to the line
+	
 	public double calculatePosition()
 	{
-		int leftReading = poleLeft();
-		int rightReading = poleRight();
-		int middleReading = poleMiddle();
-		double leftPostion =  RANGE - (leftReading - MIN);
-		double rightPostion = RANGE - (rightReading - MIN);
-		double centerPostion = RANGE - (middleReading - MIN);
+		readings[0] = poleLeft();
+		readings[2] = poleRight();
+		readings[1] = poleMiddle();
+		double leftPostion =  RANGE - (readings[0] - MIN);
+		double rightPostion = RANGE - (readings[1] - MIN);
+		double centerPostion = RANGE - (readings[2] - MIN);
 		
-		if(leftReading<MAX-10&&rightReading>MAX-10)
+		if(readings[0]<MAX-20&&readings[2]>MAX-20)
 		{
 			statePosition = 1;
 		}
-		else if(leftReading>MAX-10&&rightReading<MAX-10)
+		else if(readings[0]>MAX-20&&readings[2]<MAX-20)
 		{
 			statePosition = -1;
 		}
-		else if(leftReading>MAX-10&&rightReading>MAX-10)
+		else if(readings[0]>MAX-20&&readings[2]>MAX-20)
 		{
 			statePosition = 0;
 		}
 		
-		return  setPoint + statePosition * (leftPostion + rightPostion + centerPostion);
+		return  setPoint + statePosition * (leftPostion + rightPostion + 5*centerPostion);
 		
 	}
 	

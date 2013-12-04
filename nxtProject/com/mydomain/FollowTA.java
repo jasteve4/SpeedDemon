@@ -6,21 +6,24 @@ import lejos.nxt.MotorPort;
 import lejos.nxt.SensorPort;
 
 
-public class Follow implements Runnable 
+public class FollowTA implements Runnable 
 {
 
 	public PingLoop ping;
-	public FollowDisplay display;
+	public FollowTADisplay display;
 	public double echoValue = 0;
 	public IRSensorArray array = null;
 	public int [] readings = {0, 0, 0};
 	MotorControl motors;
 	public PID echoPID;
+//	public PID leftPID;
+//	public PID rightPID;
+//	public PID centerPID;
+//	public PID positionPID;
 	public PID curvePID;
-	public int leftSpeed = 80;
-	public int rightSpeed = 80;
-	public int timeStep = 10;
-	public int set = 20;
+	public int leftSpeed = 70;
+	public int rightSpeed = 70;
+	public int timeStep = 5;
 	public double leftPosition = 0.0;
 	public double rightPosition = 0.0;
 	public double centerPosition = 0.0;
@@ -31,18 +34,23 @@ public class Follow implements Runnable
 	public int leftTunedSpeed;
 	public int rightTunedSpeed;
 	public double position = 0;
-	public double error = 0;
+//	public double error = 0;
 	public double curveError = 0;
-	public double echoMult = 1;
 	
-	public Follow() 
+	
+	public FollowTA() 
 	{
 		// TODO Auto-generated constructor stub		
 		ping = new PingLoop(49,SensorPort.S4);
-		display = new FollowDisplay();
+		display = new FollowTADisplay();
 		array = new IRSensorArray(SensorPort.S1,SensorPort.S2,SensorPort.S3);
+//		echoPid = new PID(1,0,0);
+//		leftPID = new PID(0.9,.01,0);
+//		rightPID = new PID(0.9,.01,0);
+//		centerPID = new PID(.9,0,0);	
+//		positionPID = new PID(.9,3.1,.0001); 		// kc = .95
+		curvePID = new PID(1.9, 1.5, .01); // 2.1, 4, .001
 		echoPID = new PID(1, 0, 0);
-		curvePID = new PID(.025, .25, .00416); // u turn good(1.9, 1.5, .05) straightLinePID(.025, .25, .00416)
 		motors = new MotorControl(MotorPort.A,MotorPort.B);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI0, SensorPort.SP_MODE_INPUT);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI1, SensorPort.SP_MODE_OUTPUT);
@@ -54,77 +62,30 @@ public class Follow implements Runnable
 
 	public static void main(String[] args) 
 	{
-		// TODO Auto-generated method stub
-		new Follow();
-	
+		new FollowTA();
 	}
 
 	@Override
 	public void run() 
 	{
-		// TODO Auto-generated method stub
-
 		while(!Button.ENTER.isDown());
 		LCD.drawString("System Active", 0, 0);
 		ping.wakeUp();		
 		display.wakeUp();
 		leftTunedSpeed = leftSpeed;
 		rightTunedSpeed = rightSpeed;
-		boolean stop = false;
 		try {
 				 
 				while(!Button.ESCAPE.isDown())
 				{
 					Thread.sleep(timeStep);
 					echoValue = ping.getPulseLenght()/1000;
-					
-					echoMult = (echoPID.pid(1000, echoValue, (double)timeStep/1000))/40; // blah/40
-					
+					echoError = 20 * echoPID.pid(1000, echoValue, timeStep/1000);
 					position = array.calculatePosition();
-					curveError = 20 * curvePID.pid(0,position,(double)timeStep/1000)/(3*IR_MAX_ERROR); //360
-					readings = array.poleSensor();
+					curveError = 20 * curvePID.pid(0,position,(double)timeStep/1000)/(3*IR_MAX_ERROR);
+//					error = 20 * positionPID.pid(0,position,timeStep/1000)/(3*IR_MAX_ERROR);
 					
-					if(echoValue < 250)
-					{
-						motors.stopMotors();
-					}
-					else// if(echoValue > 2000)
-					{
-						leftTunedSpeed = (int)(set + 60 - curveError);
-						rightTunedSpeed = (int)(set + 60 + curveError);
-						
-						if(readings[0] < 800 && readings[0] > 400 && readings[2] < 800 && readings[2] > 400 && readings[1] < 800 && readings[1] > 400)
-						{
-							stop = true;
-						}
-						if(stop)
-						{
-							motors.stopMotors();
-						}
-						else
-						{
-							motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
-						}
-					}
-					//PLATOONING
-//					else
-//					{
-//						leftTunedSpeed = (int)(set - curveError - echoMult);
-//						rightTunedSpeed = (int)(set + curveError - echoMult);
-//						
-//						if(readings[0] < 800 && readings[0] > 400 && readings[2] < 800 && readings[2] > 400 && readings[1] < 800 && readings[1] > 400)
-//						{
-//							stop = true;
-//						}
-//						if(stop)
-//						{
-//							motors.stopMotors();
-//						}
-//						else
-//						{
-//							motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
-//						}
-//					}
+					motors.updateMotors((int)(70 - curveError - echoError),(int)(70 + curveError - echoError));
 				}
 		}
 		catch (InterruptedException e) 
@@ -137,16 +98,6 @@ public class Follow implements Runnable
 	public synchronized double getUltraSonicReading()
 	{
 		return echoValue;
-	}
-	
-	public synchronized double getUltraSonicError()
-	{
-		return echoMult;
-	}
-	
-	public synchronized double getCurveError()
-	{
-		return curveError;
 	}
 	
 	public synchronized int [] getIRReading()
