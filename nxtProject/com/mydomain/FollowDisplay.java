@@ -45,12 +45,12 @@ public class FollowDisplay implements Runnable
 	public void run() 
 	{
 		// TODO Auto-generated method stub
-		LCD.drawString("UltraSonic", 0, 1);
-		LCD.drawString("IR Readings ", 0, 3);
+//		LCD.drawString("UltraSonic", 0, 1);
+//		LCD.drawString("IR Readings ", 0, 3);
 		string = "time, left sensor, center sensor, right sensor, postion, echoReading, echoError\n";
 		while(logger == null);
 		logger.writeToLog(string);
-		LCD.drawString("logger enabled n", 0, 7);
+//		LCD.drawString("logger enabled n", 0, 7);
 		
 		try
 		{
