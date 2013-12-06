@@ -69,7 +69,7 @@ public class Follow implements Runnable
 		}
 		else if(state == 0) //Straight
 		{
-			curvePID.updateGains(1, 1.2, .05);
+			curvePID.updateGains(1.5, 1.2, .05);
 			state = 1;
 		}
 	}
@@ -160,7 +160,7 @@ public class Follow implements Runnable
 				if(Math.abs(curveError) > 400)
 				{
 					counter++;
-					if(counter > 15)
+					if(counter > 25)
 					{
 						switchGains();
 						counter = 0;
