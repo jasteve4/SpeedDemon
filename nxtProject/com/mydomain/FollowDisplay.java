@@ -3,7 +3,6 @@ package com.mydomain;
 import java.util.ArrayList;
 
 import lejos.nxt.Button;
-import lejos.nxt.LCD;
 
 public class FollowDisplay implements Runnable 
 {
@@ -20,8 +19,11 @@ public class FollowDisplay implements Runnable
 	public long startTime;
 	public int [] power = {0, 0};
 	public double position = 0;
+	public int logTime = 100;
+	public int logSleepTime = 20;
+	public int state = 0;
+	public int [] speed = new int[2];
 	public ArrayList<String> array = new ArrayList<String>();
-	
 
 	public FollowDisplay() 
 	{
@@ -30,28 +32,22 @@ public class FollowDisplay implements Runnable
 		new Thread(this).start();
 	}
 
-	public static void main(String[] args) 
-	{
-		// TODO Auto-generated method stub
-
-	}
-	
 	public synchronized void wakeUp() 
 	{
-			wakeUp = true;
+		wakeUp = true;
 	}
 
 	@Override
 	public void run() 
 	{
 		// TODO Auto-generated method stub
-//		LCD.drawString("UltraSonic", 0, 1);
-//		LCD.drawString("IR Readings ", 0, 3);
-		string = "time, left sensor, center sensor, right sensor, postion, echoReading, echoError\n";
+		//		LCD.drawString("UltraSonic", 0, 1);
+		//		LCD.drawString("IR Readings ", 0, 3);
+		string = "time, left sensor, center sensor, right sensor, postion, echoReading, echoError, curveError, leftSpeed, rightSpeed, state\n";
 		while(logger == null);
 		logger.writeToLog(string);
-//		LCD.drawString("logger enabled n", 0, 7);
-		
+		//		LCD.drawString("logger enabled n", 0, 7);
+
 		try
 		{
 			while((!wakeUp)&&(!Button.ESCAPE.isDown()));
@@ -62,20 +58,22 @@ public class FollowDisplay implements Runnable
 				echoPID = follow.getUltraSonicError();
 				curveErr = follow.getCurveError();
 				readings = follow.getIRReading();
+				state = follow.getState();
+				speed = follow.getSpeed();
 				//error = follow.getPosition();
 				power = follow.getPower();
 				position = follow.getPostion2();
 				string = ((double)(System.nanoTime() - startTime)/1000000) + ", " + readings[0]
 						+ ", " + readings[1] +  ", " + readings[2] + 
-						", " + position + ", " + echoReading + ", " + echoPID + "\n";
-				
-				if((System.currentTimeMillis() - writeTimer) >= 100)
+						", " + position + ", " + echoReading + ", " + echoPID + "," + curveErr + 
+						", " + speed[0] + ", " + speed[1] + ", " + state + "\n";
+				if((System.currentTimeMillis() - writeTimer) >= logTime)
 				{
 					array.add(string);
 					string = "";
 					writeTimer = System.currentTimeMillis();
 				}
-				Thread.sleep(20);
+				Thread.sleep(logSleepTime);
 			}
 			for(int n = 0; n < array.size();n++)
 				logger.writeToLog(array.get(n));

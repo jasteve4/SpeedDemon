@@ -14,6 +14,7 @@ public class Follow implements Runnable
 	public double echoValue = 1000;
 	public IRSensorArray array = null;
 	public int [] readings = {0, 0, 0};
+	public int [][] tracker = new int[3][10];
 	MotorControl motors;
 	public PID echoPID;
 	public PID curvePID;
@@ -34,7 +35,11 @@ public class Follow implements Runnable
 	public double error = 0;
 	public double curveError = 0;
 	public int menuSelection = 0;
-	
+	public boolean stop = false;
+	public int counter = 0;
+	public int state = 0;
+	public int echoTarget = 0;
+
 	public Follow() 
 	{
 		// TODO Auto-generated constructor stub		
@@ -55,15 +60,30 @@ public class Follow implements Runnable
 		new Thread(this).start();
 	}
 	
+	public void switchGains()
+	{
+		if(state == 1)
+		{
+			curvePID.updateGains(1.4, 1.2, .4);
+			state = 0;
+		}
+		else if(state == 0)
+		{
+			curvePID.updateGains(1, 1.2, .05);
+			state = 1;
+		}
+	}
+
 	public void taskSetUp(int task)
 	{
 		LCD.clear();
 		if(menuSelection == 1)
 		{
-			curvePID = new PID(1.9, 1.5, .05);
-			echoPID = new PID(0, 0, 0);
+			curvePID = new PID(1, 1.2, .05); //(1.9, 1.5, .05)
+			echoPID = new PID(1, 0, 0);
 			LCD.drawString("Task 1-2 Selected", 0, 0);
 			set = 80;
+			echoTarget = 150;
 		}
 		else if(menuSelection == 2)
 		{
@@ -71,6 +91,7 @@ public class Follow implements Runnable
 			echoPID = new PID(1, 0, 0);
 			LCD.drawString("Task 3 Selected", 0, 0);
 			set = 20;
+			echoTarget = 1000;
 		}
 		else
 		{
@@ -85,7 +106,7 @@ public class Follow implements Runnable
 		LCD.drawString("Press Enter", 0, 1);
 		LCD.drawString("to Start", 0, 2);
 	}
-	
+
 	public int getTaskNumber()
 	{
 		int menuSelection = Button.waitForAnyPress();
@@ -123,84 +144,128 @@ public class Follow implements Runnable
 		{
 			LCD.drawString("Task 3 Selected", 0, 0);
 		}
-		ping.wakeUp();		
+		ping.wakeUp();	
 		display.wakeUp();
 		LCD.drawString("Threads Awake", 0, 1);
 		leftTunedSpeed = leftSpeed;
 		rightTunedSpeed = rightSpeed;
-		boolean stop = false;
 		LCD.drawString("Running...", 0, 2);
 		try {
-				 
-				while(!Button.ESCAPE.isDown())
+			Thread.sleep(50);
+			while(!Button.ESCAPE.isDown())
+			{
+				Thread.sleep(timeStep);
+				if(Math.abs(curveError) > 400)
 				{
-					Thread.sleep(timeStep);
-					echoValue = ping.getPulseLenght()/1000;
-					LCD.drawString("" + echoValue, 0, 4);
-					
-					echoError = (echoPID.pid(1000, echoValue, (double)timeStep/1000))/40; // blah/40
-					
-					position = array.calculatePosition();
-					curveError = 20 * curvePID.pid(0,position,(double)timeStep/1000)/(3*IR_MAX_ERROR); //360
-					readings = array.poleSensor();
-					
-					if(menuSelection == 1) // Task 1-2: Line and Block Stop
+					counter++;
+					if(counter > 15)
 					{
-						if(echoValue < 300)
-						{
-							stop = true;
-						}
-						else
-						{
-							stop = false;
-						}
-						leftTunedSpeed = (int)(set - curveError);
-						rightTunedSpeed = (int)(set + curveError);
-						
-						motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
+						switchGains();
+						counter = 0;
 					}
-					else if(menuSelection == 2) //Task 3: Platooning and Redline Stop
+				}
+//				else
+//				{
+//					counter++;
+//					if(counter > 50)
+//					{
+//						state = 0;
+//						switchGains();
+//					}
+//				}
+				
+//				state = 1;
+//				switchGains();
+//				else
+//				{
+//					counter = 0;
+//				}
+				
+				echoValue = ping.getPulseLenght()/1000;
+				//					LCD.drawString("" + echoValue, 0, 4);
+
+				echoError = (echoPID.pid(echoTarget, echoValue, (double)timeStep/1000))/40; // blah/40
+
+				position = array.calculatePosition();
+				curveError = 20 * curvePID.pid(0,position,(double)timeStep/1000)/(3*IR_MAX_ERROR); //360
+				readings = array.poleSensor();
+
+				if(menuSelection == 1) // Task 1-2: Line and Block Stop
+				{
+					leftTunedSpeed = (int)(set - curveError);
+					rightTunedSpeed = (int)(set + curveError);
+//					if(echoValue < 600)
+//					{
+//						leftTunedSpeed /= 2;
+//						rightTunedSpeed /= 2;
+//					}
+//					if(echoValue < 300)
+//					{
+//						leftTunedSpeed /= 5;
+//						rightTunedSpeed /= 5;
+//					}
+					if(echoValue < 300)
 					{
-						if(readings[0] < 800 && readings[0] > 400 && readings[2] < 800 && readings[2] > 400 && readings[1] < 800 && readings[1] > 400)
-						{
-							stop = true;
-						}
-						leftTunedSpeed = (int)(set - curveError - echoError);
-						rightTunedSpeed = (int)(set + curveError - echoError);
-					}
-					if(stop)
-					{
-						motors.stopMotors();
-						LCD.drawString("Stopped", 0, 3);
+						stop = true;
 					}
 					else
 					{
-						motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
+						stop = false;
 					}
 				}
+				else if(menuSelection == 2) //Task 3: Platooning and Redline Stop
+				{
+					if(readings[0] < 800 && readings[0] > 400 && readings[2] < 800 && readings[2] > 400 && readings[1] < 800 && readings[1] > 400)
+					{
+						stop = true;
+					}
+					leftTunedSpeed = (int)(set - curveError - echoError);
+					rightTunedSpeed = (int)(set + curveError - echoError);
+				}
+				if(stop)
+				{
+					motors.stopMotors();
+					LCD.drawString("Stopped", 0, 3);
+				}
+				else
+				{
+					motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
+				}
+			}
 		}
 		catch (InterruptedException e) 
 		{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
-	
+
 	public synchronized double getUltraSonicReading()
 	{
 		return echoValue;
 	}
 	
+	public synchronized int getState()
+	{
+		return state;
+	}
+	
+	public synchronized int[] getSpeed()
+	{
+		int[] speed = {leftTunedSpeed, rightTunedSpeed};
+		return speed;
+	}
+
 	public synchronized double getUltraSonicError()
 	{
 		return echoError;
 	}
-	
+
 	public synchronized double getCurveError()
 	{
 		return curveError;
 	}
-	
+
 	public synchronized int [] getIRReading()
 	{
 		return readings;
@@ -211,13 +276,13 @@ public class Follow implements Runnable
 		double[] error = {echoError, leftPosition, centerPosition, rightPosition};
 		return error;
 	}
-	
+
 	public synchronized int [] getPower()
 	{
 		int [] power = {leftTunedSpeed, rightTunedSpeed};
 		return power;
 	}
-	
+
 	public synchronized double getPostion2()
 	{
 		return position;

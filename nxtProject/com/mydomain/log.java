@@ -8,7 +8,7 @@ public class log
 	private OutputStreamWriter osWriter = null;
 	private OutputStream outStream = null;
 	private File OutputFile = null;
-	
+
 	public log(String logFile) 
 	{
 		// TODO Auto-generated constructor stub
@@ -21,11 +21,10 @@ public class log
 		catch(IOException e)
 		{
 			e.printStackTrace();
-			
+
 		}
 	}
-	
-	
+
 	public void writeToLog(String string)
 	{
 		try {
@@ -35,9 +34,8 @@ public class log
 			e.printStackTrace();
 		}	
 	}
-	
-	
-	
+
+	@SuppressWarnings("restriction")
 	public void closeLog()
 	{	
 		try
@@ -52,15 +50,4 @@ public class log
 			ioe.printStackTrace();
 		}
 	}		
-		
-
-	public static void main(String[] args) 
-	{
-		// TODO Auto-generated method stub
-		log test = new log("logTest.txt");
-		test.writeToLog("Yes oh Yes");
-		test.closeLog();
-	
-	}
-
 }

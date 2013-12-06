@@ -1,0 +1,20 @@
+Use counters to change PID gains
+
+increase P
+	decrease rise time
+	increase overshoot
+	small change in settling time
+	decrease steady state error
+	degrade stability
+increase I
+	decrease rise time
+	increase overshoot
+	increase settling time
+	eliminate steady state error
+	degrade stability
+increase D
+	minor change rise time
+	decrease overshoot
+	decrease settling time
+	no effect on steady state error
+	improve stability if small kd
