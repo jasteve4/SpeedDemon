@@ -62,12 +62,12 @@ public class Follow implements Runnable
 	
 	public void switchGains()
 	{
-		if(state == 1)
+		if(state == 1) //Curve
 		{
-			curvePID.updateGains(1.4, 1.2, .4);
+			curvePID.updateGains(1.3, 1.2, .25); //(1.9, 1.5, .05)
 			state = 0;
 		}
-		else if(state == 0)
+		else if(state == 0) //Straight
 		{
 			curvePID.updateGains(1, 1.2, .05);
 			state = 1;
@@ -79,7 +79,7 @@ public class Follow implements Runnable
 		LCD.clear();
 		if(menuSelection == 1)
 		{
-			curvePID = new PID(1, 1.2, .05); //(1.9, 1.5, .05)
+			curvePID = new PID(1, 0, 0); //Initialized
 			echoPID = new PID(1, 0, 0);
 			LCD.drawString("Task 1-2 Selected", 0, 0);
 			set = 80;
@@ -92,6 +92,7 @@ public class Follow implements Runnable
 			LCD.drawString("Task 3 Selected", 0, 0);
 			set = 20;
 			echoTarget = 1000;
+//			motors.enableReverse();
 		}
 		else
 		{
@@ -149,6 +150,7 @@ public class Follow implements Runnable
 		LCD.drawString("Threads Awake", 0, 1);
 		leftTunedSpeed = leftSpeed;
 		rightTunedSpeed = rightSpeed;
+		switchGains();
 		LCD.drawString("Running...", 0, 2);
 		try {
 			Thread.sleep(50);

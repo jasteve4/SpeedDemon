@@ -20,13 +20,18 @@ public class MotorControl {
 			leftSpeed = 100;
 		if(rightSpeed > 100)
 			rightSpeed = 100;
-		if(rightSpeed < 0)
-			rightSpeed = 0;		
-		if(leftSpeed < 0)
-			leftSpeed = 0;
+		if(rightSpeed < -100)
+			rightSpeed = -100;		
+		if(leftSpeed < -100)
+			leftSpeed = -100;
 
 		leftMotor.setSpeed(leftSpeed);
 		rightMotor.setSpeed(rightSpeed);
+	}
+	public void enableReverse()
+	{
+		leftMotor.enableReverse();
+		rightMotor.enableReverse();
 	}
 	
 	public void stopMotors()
