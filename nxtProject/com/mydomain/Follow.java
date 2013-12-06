@@ -64,12 +64,14 @@ public class Follow implements Runnable
 	{
 		if(state == 1) //Curve
 		{
-			curvePID.updateGains(1.3, 1.2, .25); //(1.9, 1.5, .05)
+//			curvePID.updateGains(1.3, 1.2, .25); //(1.9, 1.5, .05)
+			curvePID.updateGains(1, 1, .01);
+
 			state = 0;
 		}
 		else if(state == 0) //Straight
 		{
-			curvePID.updateGains(1.5, 1.2, .05);
+			curvePID.updateGains(1, 1, .01);
 			state = 1;
 		}
 	}
@@ -157,10 +159,10 @@ public class Follow implements Runnable
 			while(!Button.ESCAPE.isDown())
 			{
 				Thread.sleep(timeStep);
-				if(Math.abs(curveError) > 400)
+				if(Math.abs(curveError) > 500)
 				{
 					counter++;
-					if(counter > 25)
+					if(counter > 10)
 					{
 						switchGains();
 						counter = 0;
@@ -176,8 +178,9 @@ public class Follow implements Runnable
 //					}
 //				}
 				
-//				state = 1;
-//				switchGains();
+				state = 0;
+				switchGains();
+				state = 0;
 //				else
 //				{
 //					counter = 0;
@@ -206,7 +209,7 @@ public class Follow implements Runnable
 //						leftTunedSpeed /= 5;
 //						rightTunedSpeed /= 5;
 //					}
-					if(echoValue < 300)
+					if(echoValue < 350)
 					{
 						stop = true;
 					}
