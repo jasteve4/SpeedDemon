@@ -147,7 +147,7 @@ public class ECE556Frame extends javax.swing.JFrame {
         });
         jPanel1.add(GetC2Button, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 260, 191, 33));
 
-        txtNXTName.setText("NXT407");
+        txtNXTName.setText("Blue");
         txtNXTName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtNXTNameActionPerformed(evt);
