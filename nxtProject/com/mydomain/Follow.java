@@ -4,6 +4,7 @@ import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.MotorPort;
 import lejos.nxt.SensorPort;
+import lejos.nxt.Sound;
 
 
 public class Follow implements Runnable 
@@ -14,7 +15,6 @@ public class Follow implements Runnable
 	public double echoValue = 1000;
 	public IRSensorArray array = null;
 	public int [] readings = {0, 0, 0};
-	public int [][] tracker = new int[3][10];
 	MotorControl motors;
 	public PID echoPID;
 	public PID curvePID;
@@ -59,19 +59,29 @@ public class Follow implements Runnable
 
 		new Thread(this).start();
 	}
-	
+
 	public void switchGains()
 	{
+		double a = 2.5; //1.7 S
+		double b = 1.25; //1.6 S
 		if(state == 1) //Curve
 		{
-//			curvePID.updateGains(1.3, 1.2, .25); //(1.9, 1.5, .05)
-			curvePID.updateGains(1, 1, .01);
+			//			curvePID.updateGains(1.3, 1.2, .25); //(1.9, 1.5, .05)
+			//			curvePID.updateGains(1.7, 0, 0);
 
+			curvePID.updateGains(0.33*a, a*b/3, a/b); //Curve
+
+			//			curvePID.updateGains(0.33*a, 2*a/b, a*b/3); //Straight
 			state = 0;
 		}
 		else if(state == 0) //Straight
 		{
-			curvePID.updateGains(1, 1, .01);
+			//			curvePID.updateGains(1.7, 0, 0);
+			//			curvePID.updateGains(1.3, 1, .01);
+
+			curvePID.updateGains(0.33*a, a*b/3, a/b); //Curve
+
+			//			curvePID.updateGains(0.33*a, 2*a/b, a*b/3); //Straight
 			state = 1;
 		}
 	}
@@ -83,18 +93,20 @@ public class Follow implements Runnable
 		{
 			curvePID = new PID(1, 0, 0); //Initialized
 			echoPID = new PID(1, 0, 0);
-			LCD.drawString("Task 1-2 Selected", 0, 0);
+			LCD.drawString("Task 1-2", 0, 0);
 			set = 80;
-			echoTarget = 150;
+			echoTarget = 200;
 		}
 		else if(menuSelection == 2)
 		{
-			curvePID = new PID(.025, .25, .00416);
+			double a = 1.7;
+			double b = 1.6;
+			curvePID = new PID(0.33*a, 2*a/b, a*b/3);
 			echoPID = new PID(1, 0, 0);
-			LCD.drawString("Task 3 Selected", 0, 0);
+			LCD.drawString("Task 3", 0, 0);
 			set = 20;
-			echoTarget = 1000;
-//			motors.enableReverse();
+			echoTarget = 890;
+			//			motors.enableReverse();
 		}
 		else
 		{
@@ -159,57 +171,69 @@ public class Follow implements Runnable
 			while(!Button.ESCAPE.isDown())
 			{
 				Thread.sleep(timeStep);
-				if(Math.abs(curveError) > 500)
+				if(menuSelection == 1)
 				{
-					counter++;
-					if(counter > 10)
+					if(Math.abs(curveError) > 300)
 					{
-						switchGains();
-						counter = 0;
+						counter++;
+						if(counter > 10)
+						{
+							switchGains();
+							counter = 0;
+						}
+					}
+					if(state == 0)
+					{
+						Sound.beep();
 					}
 				}
-//				else
-//				{
-//					counter++;
-//					if(counter > 50)
-//					{
-//						state = 0;
-//						switchGains();
-//					}
-//				}
-				
-				state = 0;
-				switchGains();
-				state = 0;
-//				else
-//				{
-//					counter = 0;
-//				}
-				
+				//				else
+				//				{
+				//					counter++;
+				//					if(counter > 50)
+				//					{
+				//						state = 0;
+				//						switchGains();
+				//					}
+				//				}
+
+				//				state = 0;
+				//				switchGains();
+				//				state = 0;
+				//				else
+				//				{
+				//					counter = 0;
+				//				}
+
 				echoValue = ping.getPulseLenght()/1000;
 				//					LCD.drawString("" + echoValue, 0, 4);
 
 				echoError = (echoPID.pid(echoTarget, echoValue, (double)timeStep/1000))/40; // blah/40
 
 				position = array.calculatePosition();
-				curveError = 20 * curvePID.pid(0,position,(double)timeStep/1000)/(3*IR_MAX_ERROR); //360
+
+				curveError = 10 * curvePID.pid(0,position,(double)timeStep/1000)/(3*IR_MAX_ERROR); //360
+
 				readings = array.poleSensor();
 
 				if(menuSelection == 1) // Task 1-2: Line and Block Stop
 				{
-					leftTunedSpeed = (int)(set - curveError);
-					rightTunedSpeed = (int)(set + curveError);
-//					if(echoValue < 600)
-//					{
-//						leftTunedSpeed /= 2;
-//						rightTunedSpeed /= 2;
-//					}
-//					if(echoValue < 300)
-//					{
-//						leftTunedSpeed /= 5;
-//						rightTunedSpeed /= 5;
-//					}
-					if(echoValue < 350)
+					if(echoValue < 600)
+					{
+						leftTunedSpeed = (int)(set - curveError - echoError);
+						rightTunedSpeed = (int)(set + curveError - echoError);
+					}
+					else
+					{
+						leftTunedSpeed = (int)(set - curveError);
+						rightTunedSpeed = (int)(set + curveError);
+					}
+					//					if(echoValue < 300)
+					//					{
+					//						leftTunedSpeed /= 5;
+					//						rightTunedSpeed /= 5;
+					//					}
+					if(echoValue < 400)
 					{
 						stop = true;
 					}
@@ -249,12 +273,12 @@ public class Follow implements Runnable
 	{
 		return echoValue;
 	}
-	
+
 	public synchronized int getState()
 	{
 		return state;
 	}
-	
+
 	public synchronized int[] getSpeed()
 	{
 		int[] speed = {leftTunedSpeed, rightTunedSpeed};

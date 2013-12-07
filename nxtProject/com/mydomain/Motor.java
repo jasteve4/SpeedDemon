@@ -6,7 +6,7 @@ import lejos.nxt.NXTMotor;
 public class Motor 
 {
 	private NXTMotor motor;
-	private boolean reverseEnabled = false;
+//	private boolean reverseEnabled = false;
 
 	public Motor(MotorPort Motor) 
 	{
@@ -32,11 +32,11 @@ public class Motor
 //		}
 		motor.setPower(setPoint);
 	}
-	
-	public void enableReverse()
-	{
-		reverseEnabled = true;
-	}
+//	
+//	public void enableReverse()
+//	{
+//		reverseEnabled = true;
+//	}
 	
 	public void stop()
 	{

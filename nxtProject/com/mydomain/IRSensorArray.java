@@ -12,6 +12,7 @@ public class IRSensorArray
 	private int MIN = 360;  // white
 	private int MAX = 866;  // black
 	private int RANGE = MAX - MIN;
+	private int BLACK_RANGE = 166;
 	private double setPoint =  0;
 	private short statePosition = 0;
 	private int [] readings = {0, 0, 0};
@@ -60,23 +61,23 @@ public class IRSensorArray
 		readings[2] = poleRight();
 		readings[1] = poleMiddle();
 		double leftPostion =  RANGE - (readings[0] - MIN);
-		double rightPostion = RANGE - (readings[1] - MIN);
-		double centerPostion = RANGE - (readings[2] - MIN);
+		double rightPostion = RANGE - (readings[2] - MIN);
+		double centerPostion = RANGE - (readings[1] - MIN);
 
-		if(readings[0]<MAX-20&&readings[2]>MAX-20)
+		if(readings[0]<MAX-BLACK_RANGE&&readings[2]>MAX-BLACK_RANGE)
 		{
 			statePosition = 1;
 		}
-		else if(readings[0]>MAX-20&&readings[2]<MAX-20)
+		else if(readings[0]>MAX-BLACK_RANGE&&readings[2]<MAX-BLACK_RANGE)
 		{
 			statePosition = -1;
 		}
-		else if(readings[0]>MAX-20&&readings[2]>MAX-20)
+		else if(readings[0]>MAX-BLACK_RANGE&&readings[2]>MAX-BLACK_RANGE)
 		{
 			statePosition = 0;
 		}
 
-		return  setPoint + statePosition * (leftPostion + rightPostion + 5*centerPostion);
+		return  setPoint + statePosition * (BLACK_RANGE + leftPostion + rightPostion + 5*centerPostion);
 
 	}
 }

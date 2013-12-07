@@ -28,12 +28,12 @@ public class MotorControl {
 		leftMotor.setSpeed(leftSpeed);
 		rightMotor.setSpeed(rightSpeed);
 	}
-	public void enableReverse()
-	{
-		leftMotor.enableReverse();
-		rightMotor.enableReverse();
-	}
-	
+//	public void enableReverse()
+//	{
+//		leftMotor.enableReverse();
+//		rightMotor.enableReverse();
+//	}
+//	
 	public void stopMotors()
 	{
 		leftMotor.stop();
