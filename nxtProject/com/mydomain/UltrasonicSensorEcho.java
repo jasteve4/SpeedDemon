@@ -3,7 +3,7 @@ package com.mydomain;
 import lejos.nxt.Button;
 import lejos.nxt.SensorPort;
 
-public class PingLoop implements Runnable {
+public class UltrasonicSensorEcho implements Runnable {
 
 	private int waitTime = 0;
 	private SensorPort port;
@@ -12,7 +12,7 @@ public class PingLoop implements Runnable {
 	private long pulseTime = 0;
 
 
-	public PingLoop(int Wait, SensorPort sensor)
+	public UltrasonicSensorEcho(int Wait, SensorPort sensor)
 	{
 		waitTime = Wait;
 		port = sensor;

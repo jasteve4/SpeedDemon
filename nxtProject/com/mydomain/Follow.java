@@ -10,14 +10,14 @@ import lejos.nxt.Sound;
 public class Follow implements Runnable 
 {
 
-	public PingLoop ping;
+	public UltrasonicSensorEcho ultrasonicSensor;
 	public FollowDisplay display;
 	public double echoValue = 1000;
-	public IRSensorArray array = null;
+	public IRSensorArray IRArray = null;
 	public int [] readings = {0, 0, 0};
-	MotorControl motors;
-	public PID echoPID;
-	public PID curvePID;
+	MotorControler motors;
+	public PID rangeFinderPID;
+	public PID linePID;
 	public int leftSpeed = 80;
 	public int rightSpeed = 80;
 	public int timeStep = 10;
@@ -25,7 +25,7 @@ public class Follow implements Runnable
 	public double leftPosition = 0.0;
 	public double rightPosition = 0.0;
 	public double centerPosition = 0.0;
-	public double echoError = 0;
+	public double rangePower = 0;
 	public int MAX = 866;  // black
 	public int MIN	= 380;
 	public int IR_MAX_ERROR = MAX - MIN;
@@ -43,16 +43,16 @@ public class Follow implements Runnable
 	public Follow() 
 	{
 		// TODO Auto-generated constructor stub		
-		ping = new PingLoop(49,SensorPort.S4);
+		ultrasonicSensor = new UltrasonicSensorEcho(49,SensorPort.S4);
 		display = new FollowDisplay();
 		LCD.drawString("Left for", 0, 0);
 		LCD.drawString("Task 1-2 'curve'", 0, 1);
 		LCD.drawString("Right for", 0, 3);
 		LCD.drawString("Task 3 'platoon'", 0, 4);
-		array = new IRSensorArray(SensorPort.S1,SensorPort.S2,SensorPort.S3);
+		IRArray = new IRSensorArray(SensorPort.S1,SensorPort.S2,SensorPort.S3);
 		menuSelection = getTaskNumber();
 		taskSetUp(menuSelection);
-		motors = new MotorControl(MotorPort.A,MotorPort.B);
+		motors = new MotorControler(MotorPort.A,MotorPort.B);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI0, SensorPort.SP_MODE_INPUT);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI1, SensorPort.SP_MODE_OUTPUT);
 		display.follow = this;
@@ -66,7 +66,7 @@ public class Follow implements Runnable
 		//		double b = 1.25; //1.6 S
 		if(state == 1) //Curve
 		{
-			curvePID.updateGains(1.9, 1.5, .05); //(1.9, 1.5, .05)
+			linePID.updateGains(1.9, 1.5, .05); //(1.9, 1.5, .05)
 			//			curvePID.updateGains(1.7, 0, 0);
 
 			//			curvePID.updateGains(0.33*a, a*b/3, a/b); //Curve
@@ -80,7 +80,7 @@ public class Follow implements Runnable
 			//			curvePID.updateGains(1.3, 1, .01);
 			double a = 1.7;
 			double b = 1.6;
-			curvePID.updateGains(1.9, 1.5, .05);
+			linePID.updateGains(1.9, 1.5, .05);
 //			curvePID.updateGains(.561, .906, .01);
 
 			//			curvePID.updateGains(0.33*a, a*b/3, a/b); //Curve
@@ -95,8 +95,8 @@ public class Follow implements Runnable
 		LCD.clear();
 		if(menuSelection == 1)
 		{
-			curvePID = new PID(1, 0, 0); //Initialized
-			echoPID = new PID(1, 0, 0);
+			linePID = new PID(1, 0, 0); //Initialized
+			rangeFinderPID = new PID(1, 0, 0);
 			LCD.drawString("Task 1-2", 0, 0);
 			set = 80;
 			echoTarget = 200;
@@ -105,8 +105,8 @@ public class Follow implements Runnable
 		{
 			double a = 1.7;
 			double b = 1.6;
-			curvePID = new PID(0.33*a, 2*a/b, a*b/3);
-			echoPID = new PID(4, 6, .1);
+			linePID = new PID(0.33*a, 2*a/b, a*b/3);
+			rangeFinderPID = new PID(4, 6, .1);
 			LCD.drawString("Task 3", 0, 0);
 			set = 20;
 			echoTarget = 890;
@@ -163,7 +163,7 @@ public class Follow implements Runnable
 		{
 			LCD.drawString("Task 3 Selected", 0, 0);
 		}
-		ping.wakeUp();	
+		ultrasonicSensor.wakeUp();	
 		display.wakeUp();
 		LCD.drawString("Threads Awake", 0, 1);
 		leftTunedSpeed = leftSpeed;
@@ -209,23 +209,23 @@ public class Follow implements Runnable
 				//					counter = 0;
 				//				}
 
-				echoValue = ping.getPulseLenght()/1000;
+				echoValue = ultrasonicSensor.getPulseLenght()/1000;
 				//					LCD.drawString("" + echoValue, 0, 4);
 
-				echoError = (echoPID.pid(echoTarget, echoValue, (double)timeStep/1000))/40; // blah/40
+				rangePower = (rangeFinderPID.pid(echoTarget, echoValue, (double)timeStep/1000))/40; // blah/40
 
-				position = array.calculatePosition();
+				position = IRArray.calculatePosition();
 
-				curveError = 10 * curvePID.pid(0,position,(double)timeStep/1000)/(3*IR_MAX_ERROR); //360
+				curveError = 10 * linePID.pid(0,position,(double)timeStep/1000)/(3*IR_MAX_ERROR); //360
 
-				readings = array.poleSensor();
+				readings = IRArray.poleSensor();
 
 				if(menuSelection == 1) // Task 1-2: Line and Block Stop
 				{
 					if(echoValue < 600)
 					{
-						leftTunedSpeed = (int)(set - curveError - echoError);
-						rightTunedSpeed = (int)(set + curveError - echoError);
+						leftTunedSpeed = (int)(set - curveError - rangePower);
+						rightTunedSpeed = (int)(set + curveError - rangePower);
 					}
 					else
 					{
@@ -248,7 +248,7 @@ public class Follow implements Runnable
 				}
 				else if(menuSelection == 2) //Task 3: Platooning and Redline Stop
 				{
-					echoPID.capI(100);
+					rangeFinderPID.capI(100);
 					//					if(echoValue < echoTarget)
 					//					{
 					//						leftTunedSpeed = (int)(set - curveError - echoError)/5;
@@ -256,8 +256,8 @@ public class Follow implements Runnable
 					//					}
 					//					else
 					//					{
-					leftTunedSpeed = (int)(set - curveError - echoError);
-					rightTunedSpeed = (int)(set + curveError - echoError);
+					leftTunedSpeed = (int)(set - curveError - rangePower);
+					rightTunedSpeed = (int)(set + curveError - rangePower);
 					//					}
 					if(readings[0] < 800 && readings[0] > 400 && readings[2] < 800 && readings[2] > 400 && readings[1] < 800 && readings[1] > 400)
 					{
@@ -319,7 +319,7 @@ public class Follow implements Runnable
 
 	public synchronized double getUltraSonicError()
 	{
-		return echoError;
+		return rangePower;
 	}
 
 	public synchronized double getCurveError()
@@ -334,7 +334,7 @@ public class Follow implements Runnable
 
 	public synchronized double [] getPosition()
 	{
-		double[] error = {echoError, leftPosition, centerPosition, rightPosition};
+		double[] error = {rangePower, leftPosition, centerPosition, rightPosition};
 		return error;
 	}
 
