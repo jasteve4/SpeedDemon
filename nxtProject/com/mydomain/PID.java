@@ -34,6 +34,14 @@ public class PID {
 		kd = e;
 		ki = f;
 	}
+	
+	public void capI(int cap)
+	{
+		if(iError > cap)
+			iError = cap;
+		else if(-iError > cap)
+			iError = -cap;
+	}
 
 	public double pid(int target, double processVar, double timestep)
 	{

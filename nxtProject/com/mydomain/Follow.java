@@ -62,14 +62,14 @@ public class Follow implements Runnable
 
 	public void switchGains()
 	{
-		double a = 2.5; //1.7 S
-		double b = 1.25; //1.6 S
+		//		double a = 2.5; //1.7 S
+		//		double b = 1.25; //1.6 S
 		if(state == 1) //Curve
 		{
-			//			curvePID.updateGains(1.3, 1.2, .25); //(1.9, 1.5, .05)
+			curvePID.updateGains(1.9, 1.5, .05); //(1.9, 1.5, .05)
 			//			curvePID.updateGains(1.7, 0, 0);
 
-			curvePID.updateGains(0.33*a, a*b/3, a/b); //Curve
+			//			curvePID.updateGains(0.33*a, a*b/3, a/b); //Curve
 
 			//			curvePID.updateGains(0.33*a, 2*a/b, a*b/3); //Straight
 			state = 0;
@@ -78,10 +78,14 @@ public class Follow implements Runnable
 		{
 			//			curvePID.updateGains(1.7, 0, 0);
 			//			curvePID.updateGains(1.3, 1, .01);
+			double a = 1.7;
+			double b = 1.6;
+			curvePID.updateGains(1.9, 1.5, .05);
+//			curvePID.updateGains(.561, .906, .01);
 
-			curvePID.updateGains(0.33*a, a*b/3, a/b); //Curve
+			//			curvePID.updateGains(0.33*a, a*b/3, a/b); //Curve
 
-			//			curvePID.updateGains(0.33*a, 2*a/b, a*b/3); //Straight
+//			curvePID.updateGains(0.33*a, 2*a/b, a*b/3); //Straight
 			state = 1;
 		}
 	}
@@ -102,7 +106,7 @@ public class Follow implements Runnable
 			double a = 1.7;
 			double b = 1.6;
 			curvePID = new PID(0.33*a, 2*a/b, a*b/3);
-			echoPID = new PID(1, 0, 0);
+			echoPID = new PID(4, 6, .1);
 			LCD.drawString("Task 3", 0, 0);
 			set = 20;
 			echoTarget = 890;
@@ -173,7 +177,7 @@ public class Follow implements Runnable
 				Thread.sleep(timeStep);
 				if(menuSelection == 1)
 				{
-					if(Math.abs(curveError) > 300)
+					if(Math.abs(curveError) > 200)
 					{
 						counter++;
 						if(counter > 10)
@@ -244,12 +248,21 @@ public class Follow implements Runnable
 				}
 				else if(menuSelection == 2) //Task 3: Platooning and Redline Stop
 				{
+					echoPID.capI(100);
+					//					if(echoValue < echoTarget)
+					//					{
+					//						leftTunedSpeed = (int)(set - curveError - echoError)/5;
+					//						rightTunedSpeed = (int)(set + curveError - echoError)/5;
+					//					}
+					//					else
+					//					{
+					leftTunedSpeed = (int)(set - curveError - echoError);
+					rightTunedSpeed = (int)(set + curveError - echoError);
+					//					}
 					if(readings[0] < 800 && readings[0] > 400 && readings[2] < 800 && readings[2] > 400 && readings[1] < 800 && readings[1] > 400)
 					{
 						stop = true;
 					}
-					leftTunedSpeed = (int)(set - curveError - echoError);
-					rightTunedSpeed = (int)(set + curveError - echoError);
 				}
 				if(stop)
 				{
@@ -258,7 +271,26 @@ public class Follow implements Runnable
 				}
 				else
 				{
-					motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
+					if(menuSelection == 1)
+						motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
+					else
+					{
+						if(leftTunedSpeed < 0 && rightTunedSpeed < 0)
+						{
+							motors.leftMotor.motor.backward();
+							motors.rightMotor.motor.backward();
+							leftTunedSpeed = set-leftTunedSpeed;
+							rightTunedSpeed = set-rightTunedSpeed;
+
+						}
+						else
+						{
+							motors.leftMotor.motor.forward();
+							motors.rightMotor.motor.forward();
+						}
+						motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
+
+					}
 				}
 			}
 		}

@@ -5,7 +5,7 @@ import lejos.nxt.NXTMotor;
 
 public class Motor 
 {
-	private NXTMotor motor;
+	public NXTMotor motor;
 //	private boolean reverseEnabled = false;
 
 	public Motor(MotorPort Motor) 
