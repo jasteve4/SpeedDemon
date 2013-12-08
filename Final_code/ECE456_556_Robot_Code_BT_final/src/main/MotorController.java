@@ -15,38 +15,35 @@ import lejos.nxt.NXTMotor;
  */
 public class MotorController {
 
-	public NXTMotor leftMotor = null;
-	public NXTMotor rightMotor = null;
+    public NXTMotor leftMotor = null;
+    public NXTMotor rightMotor = null;
+
+    public MotorController(MotorPort a, MotorPort b) 
+    {
+        // TODO Auto-generated constructor stub
+        leftMotor = new NXTMotor(a);
+        rightMotor = new NXTMotor(b);
+    }
 	
-	public MotorController(MotorPort a, MotorPort b) 
-	{
-		// TODO Auto-generated constructor stub
-		leftMotor = new NXTMotor(a);
-		rightMotor = new NXTMotor(b);
-	}
+    public void updateMotors(int leftSpeed, int rightSpeed)
+    {
+        if(leftSpeed > 100)
+            leftSpeed = 100;
+        if(leftSpeed < 0)
+            leftSpeed = 0;
+        if(rightSpeed > 100)
+            rightSpeed = 100;
+        if(rightSpeed < 0)
+            rightSpeed = 0;		
+
+        leftMotor.setPower(leftSpeed);
+        rightMotor.setPower(rightSpeed);
+    }
 
 
-	
-	
-	public void updateMotors(int leftSpeed, int rightSpeed)
-	{
-		if(leftSpeed > 100)
-			leftSpeed = 100;
-		if(leftSpeed < 0)
-			leftSpeed = 0;
-		if(rightSpeed > 100)
-			rightSpeed = 100;
-		if(rightSpeed < 0)
-			rightSpeed = 0;		
-		
-		leftMotor.setPower(leftSpeed);
-		rightMotor.setPower(rightSpeed);
-	}
-	
-	
-	public void stopMotors()
-	{
-		leftMotor.stop();
-		rightMotor.stop();
-	}
+    public void stopMotors()
+    {
+        leftMotor.stop();
+        rightMotor.stop();
+    }
 }

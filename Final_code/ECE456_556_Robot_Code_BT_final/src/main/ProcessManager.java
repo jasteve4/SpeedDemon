@@ -76,7 +76,7 @@ public class ProcessManager {
     public static void main(String[] args) {
         try
         {
-        processManager.initialize();
+            processManager.initialize();
         }
         catch(Exception e)
         {
