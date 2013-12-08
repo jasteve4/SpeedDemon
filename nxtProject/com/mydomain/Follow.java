@@ -12,16 +12,16 @@ public class Follow implements Runnable
 
 	public UltrasonicSensorEcho ultrasonicSensor;
 	public FollowDisplay display;
-	public double echoValue = 1000;
+	public double rangeReading = 1000;
 	public IRSensorArray IRArray = null;
 	public int [] readings = {0, 0, 0};
-	MotorControler motors;
+	MotorController motors;
 	public PID rangeFinderPID;
 	public PID linePID;
 	public int leftSpeed = 80;
 	public int rightSpeed = 80;
 	public int timeStep = 10;
-	public int set = 0;
+	public int setPower = 0;
 	public double leftPosition = 0.0;
 	public double rightPosition = 0.0;
 	public double centerPosition = 0.0;
@@ -32,8 +32,8 @@ public class Follow implements Runnable
 	public int leftTunedSpeed;
 	public int rightTunedSpeed;
 	public double position = 0;
-	public double error = 0;
-	public double curveError = 0;
+//	public double error = 0;
+	public double lineError = 0;
 	public int menuSelection = 0;
 	public boolean stop = false;
 	public int counter = 0;
@@ -52,7 +52,7 @@ public class Follow implements Runnable
 		IRArray = new IRSensorArray(SensorPort.S1,SensorPort.S2,SensorPort.S3);
 		menuSelection = getTaskNumber();
 		taskSetUp(menuSelection);
-		motors = new MotorControler(MotorPort.A,MotorPort.B);
+		motors = new MotorController(MotorPort.A,MotorPort.B);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI0, SensorPort.SP_MODE_INPUT);
 		SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI1, SensorPort.SP_MODE_OUTPUT);
 		display.follow = this;
@@ -60,35 +60,33 @@ public class Follow implements Runnable
 		new Thread(this).start();
 	}
 
-	public void switchGains()
-	{
-		//		double a = 2.5; //1.7 S
-		//		double b = 1.25; //1.6 S
-		if(state == 1) //Curve
-		{
-			linePID.updateGains(1.9, 1.5, .05); //(1.9, 1.5, .05)
-			//			curvePID.updateGains(1.7, 0, 0);
-
-			//			curvePID.updateGains(0.33*a, a*b/3, a/b); //Curve
-
-			//			curvePID.updateGains(0.33*a, 2*a/b, a*b/3); //Straight
-			state = 0;
-		}
-		else if(state == 0) //Straight
-		{
-			//			curvePID.updateGains(1.7, 0, 0);
-			//			curvePID.updateGains(1.3, 1, .01);
-			double a = 1.7;
-			double b = 1.6;
-			linePID.updateGains(1.9, 1.5, .05);
-//			curvePID.updateGains(.561, .906, .01);
-
-			//			curvePID.updateGains(0.33*a, a*b/3, a/b); //Curve
-
-//			curvePID.updateGains(0.33*a, 2*a/b, a*b/3); //Straight
-			state = 1;
-		}
-	}
+//	public void switchGains()
+//	{
+//		//		double a = 2.5; //1.7 S
+//		//		double b = 1.25; //1.6 S
+//		if(state == 1) //Curve
+//		{
+//			linePID.updateGains(1.9, 1.5, .05); //(1.9, 1.5, .05)
+//			//			curvePID.updateGains(1.7, 0, 0);
+//
+//			//			curvePID.updateGains(0.33*a, a*b/3, a/b); //Curve
+//
+//			//			curvePID.updateGains(0.33*a, 2*a/b, a*b/3); //Straight
+//			state = 0;
+//		}
+//		else if(state == 0) //Straight
+//		{
+//			//			curvePID.updateGains(1.7, 0, 0);
+//			//			curvePID.updateGains(1.3, 1, .01);
+//			linePID.updateGains(1.9, 1.5, .05);
+////			curvePID.updateGains(.561, .906, .01);
+//
+//			//			curvePID.updateGains(0.33*a, a*b/3, a/b); //Curve
+//
+////			curvePID.updateGains(0.33*a, 2*a/b, a*b/3); //Straight
+//			state = 1;
+//		}
+//	}
 
 	public void taskSetUp(int task)
 	{
@@ -98,7 +96,7 @@ public class Follow implements Runnable
 			linePID = new PID(1, 0, 0); //Initialized
 			rangeFinderPID = new PID(1, 0, 0);
 			LCD.drawString("Task 1-2", 0, 0);
-			set = 80;
+			setPower = 80;
 			echoTarget = 200;
 		}
 		else if(menuSelection == 2)
@@ -108,7 +106,7 @@ public class Follow implements Runnable
 			linePID = new PID(0.33*a, 2*a/b, a*b/3);
 			rangeFinderPID = new PID(4, 6, .1);
 			LCD.drawString("Task 3", 0, 0);
-			set = 20;
+			setPower = 20;
 			echoTarget = 890;
 			//			motors.enableReverse();
 		}
@@ -168,29 +166,29 @@ public class Follow implements Runnable
 		LCD.drawString("Threads Awake", 0, 1);
 		leftTunedSpeed = leftSpeed;
 		rightTunedSpeed = rightSpeed;
-		switchGains();
+//		switchGains();
 		LCD.drawString("Running...", 0, 2);
 		try {
 			Thread.sleep(50);
 			while(!Button.ESCAPE.isDown())
 			{
 				Thread.sleep(timeStep);
-				if(menuSelection == 1)
-				{
-					if(Math.abs(curveError) > 200)
-					{
-						counter++;
-						if(counter > 10)
-						{
-							switchGains();
-							counter = 0;
-						}
-					}
-					if(state == 0)
-					{
-						Sound.beep();
-					}
-				}
+//				if(menuSelection == 1)
+//				{
+//					if(Math.abs(lineError) > 200)
+//					{
+//						counter++;
+//						if(counter > 10)
+//						{
+//							switchGains();
+//							counter = 0;
+//						}
+//					}
+//					if(state == 0)
+//					{
+//						Sound.beep();
+//					}
+//				}
 				//				else
 				//				{
 				//					counter++;
@@ -209,35 +207,35 @@ public class Follow implements Runnable
 				//					counter = 0;
 				//				}
 
-				echoValue = ultrasonicSensor.getPulseLenght()/1000;
+				rangeReading = ultrasonicSensor.getPulseLenght()/1000;
 				//					LCD.drawString("" + echoValue, 0, 4);
 
-				rangePower = (rangeFinderPID.pid(echoTarget, echoValue, (double)timeStep/1000))/40; // blah/40
+				rangePower = (rangeFinderPID.pid(echoTarget, rangeReading, (double)timeStep/1000))/40; // blah/40
 
 				position = IRArray.calculatePosition();
 
-				curveError = 10 * linePID.pid(0,position,(double)timeStep/1000)/(3*IR_MAX_ERROR); //360
+				lineError = 10 * linePID.pid(0,position,(double)timeStep/1000)/(3*IR_MAX_ERROR); //360
 
 				readings = IRArray.poleSensor();
 
 				if(menuSelection == 1) // Task 1-2: Line and Block Stop
 				{
-					if(echoValue < 600)
+					if(rangeReading < 600)
 					{
-						leftTunedSpeed = (int)(set - curveError - rangePower);
-						rightTunedSpeed = (int)(set + curveError - rangePower);
+						leftTunedSpeed = (int)(setPower - lineError - rangePower);
+						rightTunedSpeed = (int)(setPower + lineError - rangePower);
 					}
 					else
 					{
-						leftTunedSpeed = (int)(set - curveError);
-						rightTunedSpeed = (int)(set + curveError);
+						leftTunedSpeed = (int)(setPower - lineError);
+						rightTunedSpeed = (int)(setPower + lineError);
 					}
 					//					if(echoValue < 300)
 					//					{
 					//						leftTunedSpeed /= 5;
 					//						rightTunedSpeed /= 5;
 					//					}
-					if(echoValue < 400)
+					if(rangeReading < 400)
 					{
 						stop = true;
 					}
@@ -256,8 +254,8 @@ public class Follow implements Runnable
 					//					}
 					//					else
 					//					{
-					leftTunedSpeed = (int)(set - curveError - rangePower);
-					rightTunedSpeed = (int)(set + curveError - rangePower);
+					leftTunedSpeed = (int)(setPower - lineError - rangePower);
+					rightTunedSpeed = (int)(setPower + lineError - rangePower);
 					//					}
 					if(readings[0] < 800 && readings[0] > 400 && readings[2] < 800 && readings[2] > 400 && readings[1] < 800 && readings[1] > 400)
 					{
@@ -279,8 +277,8 @@ public class Follow implements Runnable
 						{
 							motors.leftMotor.motor.backward();
 							motors.rightMotor.motor.backward();
-							leftTunedSpeed = set-leftTunedSpeed;
-							rightTunedSpeed = set-rightTunedSpeed;
+							leftTunedSpeed = setPower-leftTunedSpeed;
+							rightTunedSpeed = setPower-rightTunedSpeed;
 
 						}
 						else
@@ -303,7 +301,7 @@ public class Follow implements Runnable
 
 	public synchronized double getUltraSonicReading()
 	{
-		return echoValue;
+		return rangeReading;
 	}
 
 	public synchronized int getState()
@@ -324,7 +322,7 @@ public class Follow implements Runnable
 
 	public synchronized double getCurveError()
 	{
-		return curveError;
+		return lineError;
 	}
 
 	public synchronized int [] getIRReading()

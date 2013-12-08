@@ -26,7 +26,8 @@ public class IRSensorArray
 	private short state = 0;  // happy state is zero, 1 left sad, -1 is right sad
 	private double setPoint =  0;
 	private short statePosition = 0;
-	private int [] readings;// = {0, 0, 0};
+	private int [] readings; //= {0, 0, 0};
+        private int BLACK_RANGE = 166;
 	
 	
 	public IRSensorArray(SensorPort left,SensorPort middle, SensorPort right) 
@@ -72,20 +73,20 @@ public class IRSensorArray
 		double rightPostion = RANGE - (readings[1] - MIN);
 		double centerPostion = RANGE - (readings[2] - MIN);
 		
-		if(readings[0]<MAX-20&&readings[2]>MAX-20)
+		if(readings[0]<MAX-BLACK_RANGE&&readings[2]>MAX-BLACK_RANGE)
 		{
 			statePosition = 1;
 		}
-		else if(readings[0]>MAX-20&&readings[2]<MAX-20)
+		else if(readings[0]>MAX-BLACK_RANGE&&readings[2]<MAX-BLACK_RANGE)
 		{
 			statePosition = -1;
 		}
-		else if(readings[0]>MAX-20&&readings[2]>MAX-20)
+		else if(readings[0]>MAX-BLACK_RANGE&&readings[2]>MAX-BLACK_RANGE)
 		{
 			statePosition = 0;
 		}
 		
-		return  setPoint + statePosition * (leftPostion + rightPostion + 5*centerPostion);
+		return  setPoint + statePosition * (BLACK_RANGE + leftPostion + rightPostion + 5*centerPostion);
 		
 	}
 }

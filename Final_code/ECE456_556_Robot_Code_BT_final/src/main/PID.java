@@ -26,31 +26,31 @@ public class PID {
 	public PID() 
 	{
 		// TODO Auto-generated constructor stub
-	kp = 1;
-	kd = 0;
-	ki = 0;
-	currentError = 0;
-	previousError = 0;
-	integralError  = 0;
-	dError = 0;
-	pError = 0;
-	iError = 0;
-	totalError = 0;
+            kp = 1;
+            kd = 0;
+            ki = 0;
+            currentError = 0;
+            previousError = 0;
+            integralError  = 0;
+            dError = 0;
+            pError = 0;
+            iError = 0;
+            totalError = 0;
 	}
 	
 	public PID(double KP, double KD, double KI) 
 	{
 		// TODO Auto-generated constructor stub
-	kp = KP;
-	kd = KD;
-	ki = KI;
-	currentError = 0;
-	previousError = 0;
-	integralError  = 0;
-	dError = 0;
-	pError = 0;
-	iError = 0;
-	totalError = 0;
+            kp = KP;
+            kd = KD;
+            ki = KI;
+            currentError = 0;
+            previousError = 0;
+            integralError  = 0;
+            dError = 0;
+            pError = 0;
+            iError = 0;
+            totalError = 0;
 	}	
 	
 	public void updatePID(double KP, double KD, double KI)
@@ -58,6 +58,14 @@ public class PID {
 		kp = KP;
 		kd = KD;
 		ki = KI;
+	}
+        
+        public void capI(int cap)
+	{
+		if(iError > cap)
+			iError = cap;
+		else if(-iError > cap)
+			iError = -cap;
 	}
 	
 	// here is the function that you will need to use

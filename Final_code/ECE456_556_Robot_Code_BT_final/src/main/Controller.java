@@ -5,7 +5,6 @@
  */
 package main;
 
-import lejos.nxt.I2CPort;
 import lejos.nxt.LightSensor;
 import lejos.nxt.MotorPort;
 import lejos.nxt.SensorPort;
@@ -29,11 +28,11 @@ class Controller extends Thread {
     private IRSensorArray IRArray;
     private PID linePID;
     private PID rangeFinderPID;
-    private MotorControler motors;
+    private MotorController motors;
     public UltrasonicSensorEcho ultrasoicSensor = null;
    
-    public int leftSpeed = 70;
-    public int rightSpeed = 70;
+    public int leftSpeed = 80;
+    public int rightSpeed = 80;
     public int timeStep = 10;
     public int MAX = 866;  // black
     public int MIN = 380;
@@ -42,12 +41,13 @@ class Controller extends Thread {
     public int rightTunedSpeed;
     public double position = 0;
     public double lineError = 0;
-    public double setPower = 70;
+    public int setPower = 80;
     public long rangeReading = 1000;
     public double rangePower = 0;
     public int menuSelection = 0;
     public int []readings = {0, 0, 0};
     public boolean stop = false;
+    public int echoTarget = 0;
     
     
     //initialize the four sensors that you will be  using
@@ -58,7 +58,7 @@ class Controller extends Thread {
         middleSensor = IRArray.middleIR;
         leftSensor = IRArray.leftIR;
         rightSensor = IRArray.rightIR;
-        motors = new MotorControler(MotorPort.A,MotorPort.B);
+        motors = new MotorController(MotorPort.A,MotorPort.B);
     	LCD.drawString("Left for", 0, 0);
 	LCD.drawString("Task 1-2 'curve'", 0, 1);
 	LCD.drawString("Right for", 0, 3);
@@ -69,53 +69,59 @@ class Controller extends Thread {
 	SensorPort.S4.setSensorPinMode(SensorPort.SP_DIGI1, SensorPort.SP_MODE_OUTPUT);
     }
 
+    
+    
     public int getTaskNumber()
     {
-            int menuSelection = Button.waitForAnyPress();
-            if(menuSelection == Button.ID_LEFT) //Task 1 and 2: 
-            {
-                    return 1;
-            }
-            else if(menuSelection == Button.ID_RIGHT) //Task 3:
-            {
-                    return 2;
-            }
-            else
-            {
-                    return -1;
-            }
+        int menuSelection = Button.waitForAnyPress();
+        if(menuSelection == Button.ID_LEFT) //Task 1 and 2: 
+        {
+            return 1;
+        }
+        else if(menuSelection == Button.ID_RIGHT) //Task 3:
+        {
+            return 2;
+        }
+        else
+        {
+            return -1;
+        }
     }
     
-    	public void taskSetUp(int task)
-	{
-		LCD.clear();
-		if(menuSelection == 1)
-		{
-			linePID = new PID(1.9, 1.5, .05);
-			rangeFinderPID = new PID(0, 0, 0);
-			LCD.drawString("Task 1-2 Selected", 0, 0);
-			setPower = 80;
-		}
-		else if(menuSelection == 2)
-		{
-			linePID = new PID(.025, .25, .00416);
-			rangeFinderPID = new PID(1, 0, 0);
-			LCD.drawString("Task 3 Selected", 0, 0);
-			setPower = 20;
-		}
-		else
-		{
-			LCD.drawString("Invalid Task", 0, 0);
-			LCD.drawString("Left for", 0, 2);
-			LCD.drawString("Task 1-2 'curve'", 0, 3);
-			LCD.drawString("Right for", 0, 5);
-			LCD.drawString("Task 3 'platoon'", 0, 6);
-			menuSelection = getTaskNumber();
-			taskSetUp(menuSelection);
-		}
-		LCD.drawString("Press Enter", 0, 1);
-		LCD.drawString("to Start", 0, 2);
-	}
+    public void taskSetUp(int task)
+    {
+        LCD.clear();
+        if(menuSelection == 1)
+        {
+            linePID = new PID(1, 0, 0); //Initialized
+            rangeFinderPID = new PID(1, 0, 0);
+            LCD.drawString("Task 1-2", 0, 0);
+            setPower = 80;
+            echoTarget = 200;
+        }
+        else if(menuSelection == 2)
+        {
+            double a = 1.7;
+            double b = 1.6;
+            linePID = new PID(0.33*a, 2*a/b, a*b/3);
+            rangeFinderPID = new PID(4, 6, .1);
+            LCD.drawString("Task 3", 0, 0);
+            setPower = 20;
+            echoTarget = 890;
+        }
+        else
+        {
+            LCD.drawString("Invalid Task", 0, 0);
+            LCD.drawString("Left for", 0, 2);
+            LCD.drawString("Task 1-2 'curve'", 0, 3);
+            LCD.drawString("Right for", 0, 5);
+            LCD.drawString("Task 3 'platoon'", 0, 6);
+            menuSelection = getTaskNumber();
+            taskSetUp(menuSelection);
+        }
+        LCD.drawString("Press Enter", 0, 1);
+        LCD.drawString("to Start", 0, 2);
+    }
     
     
     //YOUR PID CODE GOES IN THIS METHOD!!
@@ -123,15 +129,14 @@ class Controller extends Thread {
     public void run() {
         //YOUR PID CODE GOES HERE!!
         //after you stop the vehicle
-        LCD.drawString("Threads Awake", 0, 5);
         LCD.clear();
         if(menuSelection == 1)
         {
-                LCD.drawString("Task 1-2 Selected", 0, 0);
+            LCD.drawString("Task 1-2 Selected", 0, 0);
         }
         else if(menuSelection == 2)
         {
-                LCD.drawString("Task 3 Selected", 0, 0);
+            LCD.drawString("Task 3 Selected", 0, 0);
         }
        // ultrasoicSensor.wakeUp();
         leftTunedSpeed = leftSpeed;
@@ -140,57 +145,83 @@ class Controller extends Thread {
         LCD.clear();
         
         try {
+            Thread.sleep(50);
+            while(!Button.ESCAPE.isDown())
+            {
+                Thread.sleep(timeStep);
+                rangeReading = ultrasoicSensor.getPulseLenght()/1000;
 
-                while(!Button.ESCAPE.isDown())
+                rangePower = (rangeFinderPID.pid(1000, rangeReading, (double)timeStep/1000))/40; // blah/40
+
+                position = IRArray.calculatePosition();
+                lineError = 10 * linePID.pid(0,position,(double)timeStep/1000)/(3*IR_MAX_ERROR); //360
+                readings = IRArray.poleSensor();
+                if(menuSelection == 1) // Task 1-2: Line and Block Stop
                 {
-                        Thread.sleep(timeStep);
-                        rangeReading = ultrasoicSensor.getPulseLenght()/1000;
-                        LCD.drawString("" + rangeReading, 0, 7);
+                    if(rangeReading < 600)
+                    {
+                        leftTunedSpeed = (int)(setPower - lineError - rangePower);
+                        rightTunedSpeed = (int)(setPower + lineError - rangePower);
+                    }
+                    else
+                    {
+                        leftTunedSpeed = (int)(setPower - lineError);
+                        rightTunedSpeed = (int)(setPower + lineError);
+                    }
 
-                        rangePower = (rangeFinderPID.pid(1000, rangeReading, (double)timeStep/1000))/40; // blah/40
+                    if(rangeReading < 400)
+                    {
+                        stop = true;
+                    }
+                    else
+                    {
+                        stop = false;
+                    }
+                }
+                else if(menuSelection == 2) //Task 3: Platooning and Redline Stop
+                {
+                    rangeFinderPID.capI(100);
+                    if(readings[0] < 800 && readings[0] > 400 && readings[2] < 800 && readings[2] > 400 && readings[1] < 800 && readings[1] > 400)
+                    {
+                        stop = true;
+                    }
+                    leftTunedSpeed = (int)(setPower - lineError - rangePower);
+                    rightTunedSpeed = (int)(setPower + lineError - rangePower);
+                }
+                if(stop)
+                {
+                    motors.stopMotors();
+                    LCD.drawString("Stopped", 0, 3);
+                }
+                else
+                {
+                    if(menuSelection == 1)
+                        motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
+                    else
+                    {
+                        if(leftTunedSpeed < 0 && rightTunedSpeed < 0)
+                        {
+                            motors.leftMotor.backward();
+                            motors.rightMotor.backward();
+                            leftTunedSpeed = setPower-leftTunedSpeed;
+                            rightTunedSpeed = setPower-rightTunedSpeed;
 
-                        position = IRArray.calculatePosition();
-                        lineError = 20 * linePID.pid(0,position,(double)timeStep/1000)/(3*IR_MAX_ERROR); //360
-                        readings = IRArray.poleSensor();
-                        if(menuSelection == 1) // Task 1-2: Line and Block Stop
-                        {
-                                if(rangeReading < 300)
-                                {
-                                        stop = true;
-                                }
-                                else
-                                {
-                                        stop = false;
-                                }
-                                leftTunedSpeed = (int)(setPower - lineError);
-                                rightTunedSpeed = (int)(setPower + lineError);
-
-                                motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
-                        }
-                        else if(menuSelection == 2) //Task 3: Platooning and Redline Stop
-                        {
-                                if(readings[0] < 800 && readings[0] > 400 && readings[2] < 800 && readings[2] > 400 && readings[1] < 800 && readings[1] > 400)
-                                {
-                                        stop = true;
-                                }
-                                leftTunedSpeed = (int)(setPower - lineError - rangePower);
-                                rightTunedSpeed = (int)(setPower + lineError - rangePower);
-                        }
-                        if(stop)
-                        {
-                                motors.stopMotors();
-                                LCD.drawString("Stopped", 0, 3);
                         }
                         else
                         {
-                                motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
+                            motors.leftMotor.forward();
+                            motors.rightMotor.forward();
                         }
+                        motors.updateMotors(leftTunedSpeed, rightTunedSpeed);
+
+                    }
                 }
+            }
         }
         catch (InterruptedException e) 
         {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         running = false;
     }

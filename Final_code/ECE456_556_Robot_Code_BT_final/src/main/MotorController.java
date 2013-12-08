@@ -13,12 +13,12 @@ import lejos.nxt.NXTMotor;
  *
  * @author Josh
  */
-public class MotorControler {
+public class MotorController {
 
 	public NXTMotor leftMotor = null;
 	public NXTMotor rightMotor = null;
 	
-	public MotorControler(MotorPort a, MotorPort b) 
+	public MotorController(MotorPort a, MotorPort b) 
 	{
 		// TODO Auto-generated constructor stub
 		leftMotor = new NXTMotor(a);
